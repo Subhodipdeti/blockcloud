@@ -3,8 +3,10 @@ import {View, ScrollView} from 'react-native';
 import {Appbar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {List, ListItem, Left, Body, Right, Text} from 'native-base';
+import useAppTheme from '../../Themes/Context';
 
 export default ({navigation}) => {
+  const { theme } = useAppTheme();
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -14,7 +16,7 @@ export default ({navigation}) => {
           Airdrops
         </Text>
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <View style={{margin: 10}}>
           <Text
             style={{

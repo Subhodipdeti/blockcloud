@@ -2,8 +2,11 @@ import React from 'react';
 import {View, ScrollView, TouchableOpacity} from 'react-native';
 import {Appbar, Title} from 'react-native-paper';
 import {Text} from 'native-base';
+import useAppTheme from '../../Themes/Context';
+import Button from '../../Components/Button';
 
 export default ({navigation}) => {
+  const { theme } = useAppTheme();
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -13,7 +16,7 @@ export default ({navigation}) => {
           Log in to Web Wallet
         </Text>
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <View style={{margin: 20}}>
           <View
             style={{
@@ -86,24 +89,7 @@ export default ({navigation}) => {
         </View>
 
         <View style={{margin: 10}}>
-          <TouchableOpacity
-            style={{
-              width: '100%',
-              backgroundColor: 'rgba(23, 73, 255, 1)',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 5,
-              padding: 10,
-            }}>
-            <Text
-              style={{
-                fontFamily: 'BlissPro-Bold',
-                color: '#fff',
-                opacity: 0.8,
-              }}>
-              Show QR code
-            </Text>
-          </TouchableOpacity>
+           <Button label="Show QR Code" />
         </View>
       </ScrollView>
     </>

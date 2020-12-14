@@ -3,8 +3,11 @@ import {View, ScrollView, TouchableOpacity, Image} from 'react-native';
 import {Appbar, Title} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Content, Card, Text} from 'native-base';
+import useAppTheme from '../../Themes/Context';
+import Button from '../../Components/Button';
 
 export default ({navigation}) => {
+  const { theme } = useAppTheme();
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -14,7 +17,7 @@ export default ({navigation}) => {
           Lockbox
         </Text>
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <Content>
           <Card>
             <View
@@ -51,24 +54,7 @@ export default ({navigation}) => {
               style={{alignSelf: 'center'}}
             />
             <View style={{margin: 10}}>
-              <TouchableOpacity
-                style={{
-                  width: '100%',
-                  backgroundColor: '#1749FF',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: 5,
-                  padding: 10,
-                }}>
-                <Text
-                  style={{
-                    fontFamily: 'BlissPro-Bold',
-                    color: '#fff',
-                    opacity: 0.8,
-                  }}>
-                  Buy Now
-                </Text>
-              </TouchableOpacity>
+              <Button label="Buy Now" />
             </View>
           </Card>
         </Content>

@@ -2,8 +2,10 @@ import React from 'react';
 import {View, ScrollView, TouchableOpacity} from 'react-native';
 import {Appbar, Title, List as PaperList} from 'react-native-paper';
 import {Text, Switch} from 'native-base';
+import useAppTheme from '../../Themes/Context';
 
 export default ({navigation}) => {
+  const { theme } = useAppTheme();
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -13,7 +15,7 @@ export default ({navigation}) => {
           Settings
         </Text>
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <View style={{margin: 10}}>
           <Text
             style={{

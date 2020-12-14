@@ -5,8 +5,10 @@ import {List, ListItem, Left, Body, Right, Text} from 'native-base';
 import Badge from '../../Components/Badge';
 import Button from '../../Components/Button';
 import Header from '../../Components/Header';
+import useAppTheme from '../../Themes/Context';
 
 const DetailsScreen = ({navigation}) => {
+  const { theme } = useAppTheme();
   const listData = [
     {
       id: 1,
@@ -28,7 +30,7 @@ const DetailsScreen = ({navigation}) => {
   return (
     <>
       <Header navigation={navigation} title="Swap" screenName="Swap" />
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <View
           style={{
             padding: 10,

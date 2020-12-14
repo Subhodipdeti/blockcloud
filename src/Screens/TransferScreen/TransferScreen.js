@@ -5,6 +5,8 @@ import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs
 import {Icon, ICON_TYPE} from '../../Assets/icons';
 import {Title} from 'react-native-paper';
 import Header from '../../Components/Header';
+import Button from '../../Components/Button';
+import useAppTheme from '../../Themes/Context';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -39,8 +41,9 @@ function MyTabs({navigation}) {
 }
 
 const BuyScreen = () => {
+  const { theme } = useAppTheme();
   return (
-    <Content>
+    <Content style={{ backgroundColor: theme.colors.background }}>
       <View
         style={{padding: 15, justifyContent: 'center', alignItems: 'center'}}>
         <Title>No crypto to send</Title>
@@ -80,41 +83,16 @@ const BuyScreen = () => {
         </View>
       </View>
       <View style={{margin: 10}}>
-        <TouchableOpacity
-          style={{
-            width: '100%',
-            backgroundColor: '#1749FF',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: 5,
-            padding: 10,
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-
-            elevation: 5,
-          }}>
-          <Text
-            style={{
-              fontFamily: 'BlissPro-Bold',
-              color: '#fff',
-              opacity: 1,
-            }}>
-            Buy Crypto
-          </Text>
-        </TouchableOpacity>
+        <Button label="Buy Crypto" />
       </View>
     </Content>
   );
 };
 
 const SellScreen = () => {
+  const { theme } = useAppTheme();
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: theme.colors.background }}>
       <View
         style={{padding: 10, borderBottomColor: '#eee', borderBottomWidth: 2}}>
         <View

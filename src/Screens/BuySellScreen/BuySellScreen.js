@@ -14,6 +14,7 @@ import {Title} from 'react-native-paper';
 import Badge from '../../Components/Badge';
 import Button from '../../Components/Button';
 import Header from '../../Components/Header';
+import useAppTheme from '../../Themes/Context';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -49,8 +50,9 @@ function MyTabs({navigation}) {
 }
 
 const BuyScreen = () => {
+  const { theme } = useAppTheme();
   return (
-    <Content>
+    <Content style={{ backgroundColor: theme.colors.background }}>
       <View style={{padding: 15}}>
         <Icon
           type={ICON_TYPE.MATERIAL_COMMUNITY}
@@ -173,6 +175,7 @@ const BuyScreen = () => {
 };
 
 const SellScreen = () => {
+  const { theme } = useAppTheme();
   const listData = [
     {
       id: 1,
@@ -192,7 +195,7 @@ const SellScreen = () => {
     },
   ];
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: theme.colors.background }}>
       <View
         style={{padding: 10, borderBottomColor: '#eee', borderBottomWidth: 2}}>
         <View>

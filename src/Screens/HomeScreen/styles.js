@@ -8,8 +8,8 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#eee',
-    borderBottomWidth: 2,
+    backgroundColor: '#fff',
+    ...styles.BoxShdowMedium
   },
   totalBalanceText: {
     fontFamily: 'BlissPro-Bold',
@@ -25,8 +25,8 @@ export default StyleSheet.create({
     fontFamily: 'BlissPro',
   },
   priceContainer: {
-    borderColor: '#DAE0E2',
-    borderWidth: 2,
+    // borderColor: '#DAE0E2',
+    // borderWidth: 2,
     borderRadius: 10,
     width: width / 1.5,
     backgroundColor: '#ffffff',
@@ -54,13 +54,12 @@ export default StyleSheet.create({
   },
   chartContainer: {
     borderRadius: 10,
-    borderColor: '#DAE0E2',
-    borderWidth: 2,
+    //borderColor: '#DAE0E2',
+    // borderWidth: 2,
     width: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     padding: 10,
     marginVertical: 10,
-    shadowColor: '#000',
     ...styles.BoxShdowMedium,
   },
   chartOuterCard: {

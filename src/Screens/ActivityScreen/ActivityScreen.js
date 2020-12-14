@@ -3,12 +3,14 @@ import {View} from 'react-native';
 import {List, ListItem, Left, Body, Right, Text} from 'native-base';
 import {Icon, ICON_TYPE} from '../../Assets/icons';
 import Header from '../../Components/Header';
+import useAppTheme from '../../Themes/Context';
 
 function ActivityScreen({navigation}) {
+  const { theme } = useAppTheme();
   return (
     <>
       <Header navigation={navigation} title="Activity" screenName="Activity" />
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: theme.colors.background }}>
         <View style={{backgroundColor: '#192A56', width: '100%'}}>
           <List
             style={{backgroundColor: '#A4B0BD', margin: 10, borderRadius: 5}}>

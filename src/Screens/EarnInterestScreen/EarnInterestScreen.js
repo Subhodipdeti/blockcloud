@@ -3,8 +3,11 @@ import {View, ScrollView, TouchableOpacity} from 'react-native';
 import {Appbar, Title} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {List, ListItem, Left, Body, Right, Text} from 'native-base';
+import Button from '../../Components/Button';
+import useAppTheme from '../../Themes/Context';
 
 export default ({navigation}) => {
+  const { theme } = useAppTheme();
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -14,7 +17,7 @@ export default ({navigation}) => {
           Interest Account
         </Text>
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: theme.colors.background }}>
         <View
           style={{
             padding: 10,
@@ -172,24 +175,7 @@ export default ({navigation}) => {
           </List>
         </View>
         <View style={{margin: 10}}>
-          <TouchableOpacity
-            style={{
-              width: '100%',
-              backgroundColor: '#1749FF',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 5,
-              padding: 10,
-            }}>
-            <Text
-              style={{
-                fontFamily: 'BlissPro-Bold',
-                color: '#fff',
-                opacity: 0.8,
-              }}>
-              Verify My Identity
-            </Text>
-          </TouchableOpacity>
+          <Button label="Verify My identity" />
         </View>
 
         <View>

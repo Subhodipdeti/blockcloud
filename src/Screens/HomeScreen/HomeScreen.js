@@ -1,28 +1,26 @@
-import React, {useRef} from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
-  Button,
-  StyleSheet,
   ScrollView,
-  StatusBar,
   Dimensions,
   TouchableOpacity,
+  StyleSheet
 } from 'react-native';
-import {Title} from 'react-native-paper';
-import {useTheme} from '@react-navigation/native';
-import {ProgressCircle, StackedAreaChart} from 'react-native-svg-charts';
+import { Title } from 'react-native-paper';
+import { ProgressCircle, StackedAreaChart } from 'react-native-svg-charts';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as shape from 'd3-shape';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {LineChart} from 'react-native-chart-kit';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { LineChart } from 'react-native-chart-kit';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import ListView from './ListView';
 import styles from './styles';
-import {LineChartData, StackedAreaChartData} from '../../Models/index';
+import { LineChartData, StackedAreaChartData } from '../../Models/index';
 import Header from '../../Components/Header';
-import {connect} from 'react-redux';
-import {signIn} from '../../Store/Actions/authActions';
+import { connect } from 'react-redux';
+import { signIn } from '../../Store/Actions/authActions';
+import useAppTheme from '../../Themes/Context';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -38,21 +36,21 @@ function MyTabs() {
   );
 }
 
-const {height, width} = Dimensions.get('screen');
+const { height, width } = Dimensions.get('screen');
 
 const LineChartpreview = () => {
   const colors = ['#1749FF', '#4834DF', '#30336B', '#3C40C6'];
   const keys = ['apples', 'bananas', 'cherries', 'dates'];
   const svgs = [
-    {onPress: () => console.log('apples')},
-    {onPress: () => console.log('bananas')},
-    {onPress: () => console.log('cherries')},
-    {onPress: () => console.log('dates')},
+    { onPress: () => console.log('apples') },
+    { onPress: () => console.log('bananas') },
+    { onPress: () => console.log('cherries') },
+    { onPress: () => console.log('dates') },
   ];
 
   return (
     <StackedAreaChart
-      style={{height: 30}}
+      style={{ height: 30 }}
       data={StackedAreaChartData}
       keys={keys}
       colors={colors}
@@ -66,14 +64,14 @@ const LineChartpreview = () => {
 const CircleChart = () => {
   return (
     <ProgressCircle
-      style={{height: 100}}
+      style={{ height: 100 }}
       progress={0.4}
       progressColor={'rgba(23, 73, 255, 1)'}
     />
   );
 };
 
-const HomeScreen = ({navigation, getData, userData}) => {
+const HomeScreen = ({ navigation, getData, userData }) => {
   console.log('===>>', userData);
   const chartConfig = {
     backgroundColor: '#fff',
@@ -93,9 +91,8 @@ const HomeScreen = ({navigation, getData, userData}) => {
   };
 
   const refRBSheet = useRef();
-  const {colors} = useTheme();
 
-  const theme = useTheme();
+  const { theme } = useAppTheme();
 
   function PriceCard() {
     const cards = [1, 2, 3];
@@ -104,7 +101,7 @@ const HomeScreen = ({navigation, getData, userData}) => {
         <View style={styles.priceContainer} key={index}>
           <View style={styles.priceOuterCard}>
             <View style={styles.priceBadgeIcon}>
-              <Title style={{color: '#fff'}}>$</Title>
+              <Title style={{ color: '#fff' }}>$</Title>
             </View>
             <View>
               <Title style={styles.priceCardTitle}>US Dollars</Title>
@@ -142,16 +139,18 @@ const HomeScreen = ({navigation, getData, userData}) => {
   function ChartCard() {
     const cards = [1, 2];
     return cards.map((item, index) => {
+
       return (
         <TouchableOpacity
+          key={index}
           style={styles.chartContainer}
           onPress={() => refRBSheet.current.open()}>
           <View style={styles.chartOuterCard}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
                 style={[
                   styles.chartInnerCard,
-                  {backgroundColor: index == 1 ? '#FAC42F' : '#45CE30'},
+                  { backgroundColor: index == 1 ? '#FAC42F' : '#45CE30' },
                 ]}>
                 <Icon name="bitcoin" color="#fff" size={20} />
               </View>
@@ -164,7 +163,7 @@ const HomeScreen = ({navigation, getData, userData}) => {
               </Title>
             </View>
 
-            <View style={{width: '30%'}}>{LineChartpreview()}</View>
+            <View style={{ width: '30%' }}>{LineChartpreview()}</View>
           </View>
 
           <View style={styles.chartPriceArea}>
@@ -185,7 +184,7 @@ const HomeScreen = ({navigation, getData, userData}) => {
               </Text>
             </View>
 
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: 'row' }}>
               <View
                 style={{
                   backgroundColor: '#eee',
@@ -201,7 +200,7 @@ const HomeScreen = ({navigation, getData, userData}) => {
                   }}>
                   $14,176.86
                 </Text>
-                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                   <Text
                     style={{
                       color: '#D63031',
@@ -229,25 +228,24 @@ const HomeScreen = ({navigation, getData, userData}) => {
   return (
     <>
       <Header navigation={navigation} title="Dashboard" screenName="Home" />
-      <ScrollView>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <View style={styles.totalAreaContainer}>
           <View>
             <Text style={styles.totalBalanceText}>Total Balance</Text>
             <Title style={styles.totalAreaShortText}>15.00</Title>
             <Text style={styles.totalAreaColorText}>0.00 (--)</Text>
           </View>
-          <View style={{width: '30%'}}>{CircleChart()}</View>
+          <View style={{ width: '30%' }}>{CircleChart()}</View>
         </View>
-        <TouchableOpacity onPress={() => getData()}>
-          <Text>Click</Text>
-        </TouchableOpacity>
+
         <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
           {PriceCard()}
         </ScrollView>
         {ChartCard()}
 
+       
         <RBSheet closeOnDragDown={true} ref={refRBSheet} height={height / 1.5}>
-          <View style={{alignItems: 'center'}}>
+          <View style={{ alignItems: 'center' }}>
             <Text
               style={{
                 fontFamily: 'BlissPro',
@@ -256,7 +254,7 @@ const HomeScreen = ({navigation, getData, userData}) => {
               Current BTC Price
             </Text>
             <Title>$14, 043.36</Title>
-            <View style={{alignItems: 'center', flexDirection: 'row'}}>
+            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
               <Text
                 style={{
                   color: '#D63031',

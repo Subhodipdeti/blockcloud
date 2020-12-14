@@ -6,31 +6,17 @@
  * @flow
  */
 
-import React, {useRef, useState, useEffect} from 'react';
-import {View, ActivityIndicator, StatusBar, AppState} from 'react-native';
-import {
-  DefaultTheme as NavigationDefaultTheme,
-  DarkTheme as NavigationDarkTheme,
-} from '@react-navigation/native';
-import {NavigationContainer} from '@react-navigation/native';
-
-import {
-  Provider as PaperProvider,
-  DefaultTheme as PaperDefaultTheme,
-  DarkTheme as PaperDarkTheme,
-} from 'react-native-paper';
-
-import {useAppContext} from '../Context/ctx';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, ActivityIndicator, StatusBar, AppState } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { useAppContext } from '../Context/ctx';
 import RootStackScreen from './MainStack/index';
 import AuthStack from './AuthStack/AuthStack';
 import CreatePinScreen from '../Screens/CreatePinScreen/CreatePinScreen';
-import {navigationRef, isMountedRef} from './index';
-const App = () => {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isUserLogeed, setisUserLogeed] = React.useState(false);
-  // const [userToken, setUserToken] = React.useState(null);
+import { navigationRef, isMountedRef } from './index';
 
-  const {loginState, toggleAppState} = useAppContext();
+const App = () => {
+  const { loginState, toggleAppState } = useAppContext();
 
   //FIXME:
 
@@ -67,36 +53,11 @@ const App = () => {
   };
   //FIXME:
 
-  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
-
-  const CustomDefaultTheme = {
-    ...NavigationDefaultTheme,
-    ...PaperDefaultTheme,
-    colors: {
-      ...NavigationDefaultTheme.colors,
-      ...PaperDefaultTheme.colors,
-      background: '#ffffff',
-      text: '#333333',
-    },
-  };
-
-  const CustomDarkTheme = {
-    ...NavigationDarkTheme,
-    ...PaperDarkTheme,
-    colors: {
-      ...NavigationDarkTheme.colors,
-      ...PaperDarkTheme.colors,
-      background: '#333333',
-      text: '#ffffff',
-    },
-  };
-
   React.useEffect(() => {
     isMountedRef.current = true;
     return () => (isMountedRef.current = false);
   }, []);
 
-  const theme = isDarkTheme ? CustomDarkTheme : CustomDefaultTheme;
 
   if (loginState.isLoading) {
     return (
@@ -113,22 +74,20 @@ const App = () => {
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme} ref={navigationRef}>
-        <StatusBar backgroundColor="#192A56" />
-
-        {loginState.userToken && loginState.value ? (
-          <CreatePinScreen
-            token={loginState.userToken}
-            isRenterPin={loginState.isRenterPin}
-          />
-        ) : loginState.userToken !== null ? (
-          <RootStackScreen />
-        ) : (
-          <AuthStack />
-        )}
-      </NavigationContainer>
-    </PaperProvider>
+    <NavigationContainer ref={navigationRef}>
+      <StatusBar backgroundColor="rgba(25, 42, 86, 0.9)" />
+      <RootStackScreen />
+      {/* {loginState.userToken && loginState.value ? (
+        <CreatePinScreen
+          token={loginState.userToken}
+          isRenterPin={loginState.isRenterPin}
+        />
+      ) : loginState.userToken !== null ? (
+        <RootStackScreen />
+      ) : (
+            <AuthStack />
+          )} */}
+    </NavigationContainer>
   );
 };
 
