@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import Header from '../../Components/Header';
 import { connect } from 'react-redux';
 import { signIn } from '../../Store/Actions/authActions';
 import useAppTheme from '../../Themes/Context';
+import { getUserDetails } from '../../Services/AsyncStorage';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -71,8 +72,8 @@ const CircleChart = () => {
   );
 };
 
-const HomeScreen = ({ navigation, getData, userData }) => {
-  console.log('===>>', userData);
+const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
+  console.log('===>>', details?.auth?.data);
   const chartConfig = {
     backgroundColor: '#fff',
     backgroundGradientFrom: '#fff',
@@ -89,6 +90,15 @@ const HomeScreen = ({ navigation, getData, userData }) => {
       stroke: '#ffa726',
     },
   };
+
+  useEffect(() => {
+    getUserDetails()
+      .then(userDetails => {
+        if (userDetails) {
+          signIn(userDetails);
+        }
+      })
+  }, [])
 
   const refRBSheet = useRef();
 
@@ -243,7 +253,7 @@ const HomeScreen = ({ navigation, getData, userData }) => {
         </ScrollView>
         {ChartCard()}
 
-       
+
         <RBSheet closeOnDragDown={true} ref={refRBSheet} height={height / 1.5}>
           <View style={{ alignItems: 'center' }}>
             <Text
@@ -288,19 +298,11 @@ const HomeScreen = ({ navigation, getData, userData }) => {
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    userData: state.auth.data,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    getData: () => dispatch(signIn('Hello')),
-  };
-};
-
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
+  state => ({
+    details: state,
+  }), {
+  signIn
+}
 )(HomeScreen);
+

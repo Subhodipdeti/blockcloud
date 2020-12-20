@@ -9,65 +9,34 @@ import {
   StatusBar,
   ScrollView,
   Alert,
+  ActivityIndicator
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import LinearGradient from 'react-native-linear-gradient';
-// import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
+import { useTheme, Appbar } from 'react-native-paper';
+import ErrorMsg from '../../Components/ErrorMsg';
+import { EMAIL_REGEXP } from '../../Utils/Helper';
+import { createUser } from '../../Services/Api';
+import { setUserDetails } from '../../Services/AsyncStorage';
+import { signIn } from '../../Store/Actions/authActions';
+import { connect } from 'react-redux';
 
-import {useTheme, Appbar} from 'react-native-paper';
-
-// import {AuthContext} from '../components/context';
-
-// import Users from '../model/users';
-
-const SignInScreen = ({navigation}) => {
+const SignUpScreen = ({ navigation, signIn }) => {
   const [data, setData] = React.useState({
-    username: '',
+    name: '',
+    email: '',
     password: '',
+    confirmPassword: '',
     check_textInputChange: false,
     secureTextEntry: true,
-    isValidUser: true,
+    isValidUser: false,
     isValidPassword: true,
+    isErr: false,
+    errMsg: '',
+    isLoading: false,
   });
 
-  const {colors} = useTheme();
-
-  // const {signIn} = React.useContext(AuthContext);
-
-  const textInputChange = val => {
-    if (val.trim().length >= 4) {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: true,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: false,
-        isValidUser: false,
-      });
-    }
-  };
-
-  const handlePasswordChange = val => {
-    if (val.trim().length >= 8) {
-      setData({
-        ...data,
-        password: val,
-        isValidPassword: true,
-      });
-    } else {
-      setData({
-        ...data,
-        password: val,
-        isValidPassword: false,
-      });
-    }
-  };
+  const { colors } = useTheme();
 
   const updateSecureTextEntry = () => {
     setData({
@@ -76,58 +45,81 @@ const SignInScreen = ({navigation}) => {
     });
   };
 
-  const handleValidUser = val => {
-    console.warn('====>>', val);
-    const EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
-    if (EMAIL_REGEXP.test(val)) {
-      setData({
-        ...data,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        isValidUser: false,
-      });
-    }
-  };
 
-  const loginHandle = (userName, password) => {
-    // const foundUser = Users.filter(item => {
-    //   return userName == item.username && password == item.password;
-    // });
-    if (data.username.length == 0 || data.password.length == 0) {
-      Alert.alert(
-        'Wrong Input!',
-        'Username or password field cannot be empty.',
-        [{text: 'Okay'}],
-      );
-      return;
-    }
-    navigation.navigate('CreatePinScreen');
-    // if (foundUser.length == 0) {
-    //   Alert.alert('Invalid User!', 'Username or password is incorrect.', [
-    //     {text: 'Okay'},
-    //   ]);
+
+  const loginHandle = () => {
+    setData({ ...data, isErr: false, errMsg: '' })
+
+    const { name, email, password, confirmPassword } = data;
+    if (!name.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter your name' });
+    if (!email.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter your email' });
+    if (!EMAIL_REGEXP.test(email.trim())) return setData({ ...data, isErr: true, errMsg: 'Please enter a valid email' });
+    if (!password.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter password' });
+    if (!confirmPassword.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter confirm password' });
+    if (password.trim() != confirmPassword.trim()) return setData({ ...data, isErr: true, errMsg: "Password doesn't match" });
+
+
+    setData({ ...data, isLoading: true });
+    createUser({ name, email, password })
+      .then(res => {
+        if (res?.data?.data?.ack != 0) {
+          setUserDetails(res?.data?.data?.details)
+          signIn(res?.data?.data?.details)
+          setData({ ...data, isLoading: false, isErr: false, errMsg: '' })
+          navigation.navigate('CreatePinScreen');
+          return;
+        }
+
+        setData({ ...data, isErr: true, isLoading: false, errMsg: res?.data?.data?.msg })
+      })
+      .catch(err => {
+        setData({ ...data, isErr: false, isLoading: false, errMsg: '' })
+        Alert.alert('Error', 'Something went wrong')
+      })
+
+    // if (data.username.length == 0 || data.password.length == 0) {
+    //   Alert.alert(
+    //     'Wrong Input!',
+    //     'Username or password field cannot be empty.',
+    //     [{text: 'Okay'}],
+    //   );
     //   return;
     // }
-    // signIn(foundUser);
+    // navigation.navigate('CreatePinScreen');
+
   };
 
   return (
     <>
-      <Appbar.Header style={{backgroundColor: '#02295F'}}>
+      <Appbar.Header style={{ backgroundColor: '#02295F' }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Create an Account" />
-        {/* <Appbar.Action icon="magnify" onPress={_handleSearch} />
-      <Appbar.Action icon="dots-vertical" onPress={_handleMore} /> */}
+
       </Appbar.Header>
       <ScrollView>
         <View style={styles.container}>
           <View animation="fadeInUpBig" style={styles.footer}>
+            <Text style={styles.text_footer}>Name</Text>
+            <View style={[styles.action, { marginBottom: 15 }]}>
+
+              <TextInput
+                value={data.name}
+                placeholder="Enter your name"
+                placeholderTextColor="#666666"
+                style={[
+                  styles.textInput,
+                  {
+                    color: colors.text,
+                  },
+                ]}
+                autoCapitalize="none"
+                onChangeText={val => setData({ ...data, name: val })}
+              />
+
+            </View>
             <Text style={styles.text_footer}>Email</Text>
             <View style={styles.action}>
-              {/* <FontAwesome name="user-o" color={colors.text} size={20} /> */}
+
               <TextInput
                 placeholder="Your Email"
                 placeholderTextColor="#666666"
@@ -138,22 +130,12 @@ const SignInScreen = ({navigation}) => {
                   },
                 ]}
                 autoCapitalize="none"
-                onChangeText={val => textInputChange(val)}
-                onEndEditing={e => handleValidUser(e.nativeEvent.text)}
+                onChangeText={val => setData({ ...data, email: val })}
+
               />
-              {/* {data.check_textInputChange ? (
-              <Animatable.View animation="bounceIn">
-                <Feather name="check-circle" color="green" size={20} />
-              </Animatable.View>
-            ) : null} */}
+
             </View>
-            {/* {data.isValidUser ? null : (
-            <Animatable.View animation="fadeInLeft" duration={500}>
-              <Text style={styles.errorMsg}>
-                Username must be 4 characters long.
-              </Text>
-            </Animatable.View>
-          )} */}
+
 
             <Text
               style={[
@@ -166,7 +148,7 @@ const SignInScreen = ({navigation}) => {
               Password
             </Text>
             <View style={styles.action}>
-              {/* <Feather name="lock" color={colors.text} size={20} /> */}
+
               <TextInput
                 placeholder="Your Password"
                 placeholderTextColor="#666666"
@@ -178,14 +160,14 @@ const SignInScreen = ({navigation}) => {
                   },
                 ]}
                 autoCapitalize="none"
-                onChangeText={val => handlePasswordChange(val)}
+                onChangeText={val => setData({ ...data, password: val })}
               />
               <TouchableOpacity onPress={updateSecureTextEntry}>
                 {data.secureTextEntry ? (
                   <Feather name="eye-off" color="grey" size={20} />
                 ) : (
-                  <Feather name="eye" color="grey" size={20} />
-                )}
+                    <Feather name="eye" color="grey" size={20} />
+                  )}
               </TouchableOpacity>
             </View>
             {data.isValidPassword ? null : (
@@ -207,7 +189,7 @@ const SignInScreen = ({navigation}) => {
               Confirm Password
             </Text>
             <View style={styles.action}>
-              {/* <Feather name="lock" color={colors.text} size={20} /> */}
+
               <TextInput
                 placeholder="Confirm Password"
                 placeholderTextColor="#666666"
@@ -219,39 +201,40 @@ const SignInScreen = ({navigation}) => {
                   },
                 ]}
                 autoCapitalize="none"
-                onChangeText={val => handlePasswordChange(val)}
+                onChangeText={val => setData({ ...data, confirmPassword: val })}
               />
             </View>
 
-            {/* <TouchableOpacity>
-          <Text style={{color: '#009387', marginTop: 15}}>
-            Forgot password?
-          </Text>
-        </TouchableOpacity> */}
-            <View style={{marginTop: 50}}>
-              <TouchableOpacity
-                onPress={() => loginHandle(data.username, data.password)}
-                style={{
-                  width: '100%',
-                  //borderColor: '#1749FF',
-                  // borderWidth: 2,
-                  backgroundColor: '#02295F',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: 5,
-                  padding: 14,
-                  elevation: 5,
-                }}>
-                <Text
+
+            {
+              !data.isLoading && (<View style={{ marginTop: 50 }}>
+                <TouchableOpacity
+                  onPress={loginHandle}
                   style={{
-                    fontFamily: 'BlissPro-Bold',
-                    color: '#fff',
-                    // opacity: 0.8,
+                    width: '100%',
+                    //borderColor: '#1749FF',
+                    // borderWidth: 2,
+                    backgroundColor: '#02295F',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 5,
+                    padding: 14,
+                    elevation: 5,
                   }}>
-                  SIGN UP
+                  <Text
+                    style={{
+                      fontFamily: 'BlissPro-Bold',
+                      color: '#fff',
+                      // opacity: 0.8,
+                    }}>
+                    SIGN UP
                 </Text>
-              </TouchableOpacity>
-            </View>
+                </TouchableOpacity>
+              </View>)
+            }
+
+            {data.isErr && <ErrorMsg msg={data.errMsg} />}
+            {data.isLoading && <ActivityIndicator style={{ marginTop: 20 }} size="large" color="#1749FF" />}
           </View>
         </View>
       </ScrollView>
@@ -259,7 +242,13 @@ const SignInScreen = ({navigation}) => {
   );
 };
 
-export default SignInScreen;
+export default connect(
+  state => ({
+    details: state,
+  }), {
+  signIn
+}
+)(SignUpScreen);
 
 const styles = StyleSheet.create({
   container: {

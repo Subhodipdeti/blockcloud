@@ -6,67 +6,39 @@ import {
   TextInput,
   Platform,
   StyleSheet,
-  StatusBar,
   Alert,
+  ActivityIndicator,
+  Keyboard
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import LinearGradient from 'react-native-linear-gradient';
-// import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 
-import {useTheme, Appbar} from 'react-native-paper';
+import { useTheme, Appbar } from 'react-native-paper';
+import { EMAIL_REGEXP } from '../../Utils/Helper';
+import { loginUser } from '../../Services/Api';
+import ErrorMsg from '../../Components/ErrorMsg';
+import { signIn } from '../../Store/Actions/authActions';
+import { connect } from 'react-redux';
+import { setUserDetails } from '../../Services/AsyncStorage';
 
 // import {AuthContext} from '../components/context';
 
 // import Users from '../model/users';
 
-const SignInScreen = ({navigation}) => {
+const SignInScreen = ({ navigation,  details, signIn}) => {
+  console.log('====>>>**', details?.auth?.data)
   const [data, setData] = React.useState({
-    username: '',
+    email: '',
     password: '',
-    check_textInputChange: false,
     secureTextEntry: true,
     isValidUser: true,
     isValidPassword: true,
+    isErr: false,
+    errMsg: '',
+    isLoading: false,
   });
 
-  const {colors} = useTheme();
-
-  // const {signIn} = React.useContext(AuthContext);
-
-  const textInputChange = val => {
-    if (val.trim().length >= 4) {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: true,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        username: val,
-        check_textInputChange: false,
-        isValidUser: false,
-      });
-    }
-  };
-
-  const handlePasswordChange = val => {
-    if (val.trim().length >= 8) {
-      setData({
-        ...data,
-        password: val,
-        isValidPassword: true,
-      });
-    } else {
-      setData({
-        ...data,
-        password: val,
-        isValidPassword: false,
-      });
-    }
-  };
+  const { colors } = useTheme();
 
   const updateSecureTextEntry = () => {
     setData({
@@ -75,53 +47,39 @@ const SignInScreen = ({navigation}) => {
     });
   };
 
-  const handleValidUser = val => {
-    if (val.trim().length >= 4) {
-      setData({
-        ...data,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        isValidUser: false,
-      });
-    }
-  };
 
-  const loginHandle = (userName, password) => {
-    if (data.username.length == 0 || data.password.length == 0) {
-      Alert.alert(
-        'Wrong Input!',
-        'Username or password field cannot be empty.',
-        [{text: 'Okay'}],
-      );
-      return;
-    }
-    navigation.navigate('CreatePinScreen');
-    // const foundUser = Users.filter(item => {
-    //   return userName == item.username && password == item.password;
-    // });
-    // if (data.username.length == 0 || data.password.length == 0) {
-    //   Alert.alert(
-    //     'Wrong Input!',
-    //     'Username or password field cannot be empty.',
-    //     [{text: 'Okay'}],
-    //   );
-    //   return;
-    // }
-    // if (foundUser.length == 0) {
-    //   Alert.alert('Invalid User!', 'Username or password is incorrect.', [
-    //     {text: 'Okay'},
-    //   ]);
-    //   return;
-    // }
-    // signIn(foundUser);
+
+  const loginHandle = () => {
+    Keyboard.dismiss()
+    setData({ ...data, isErr: false, errMsg: '' })
+    const { email, password } = data;
+    if (!email.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter your email' });
+    if (!EMAIL_REGEXP.test(email.trim())) return setData({ ...data, isErr: true, errMsg: 'Please enter a valid email' });
+    if (!password.trim()) return setData({ ...data, isErr: true, errMsg: 'Please enter password' });
+
+    setData({ ...data, isLoading: true })
+    loginUser({ email, password })
+      .then(res => {
+        if (res?.data?.data?.ack != 0) {
+          // console.log('==...', res?.data)
+          setUserDetails(res?.data?.data?.details)
+          signIn(res?.data?.data?.details)
+          setData({ ...data, isLoading: false, isErr: false, errMsg: '' })
+          navigation.navigate('CreatePinScreen');
+          return;
+        }
+        setData({ ...data, isErr: true, isLoading: false, errMsg: res?.data?.data?.msg })
+      })
+      .catch(err => {
+        setData({ ...data, isErr: false, isLoading: false, errMsg: '' })
+        Alert.alert('Error', 'Something went wrong')
+      })
+    // navigation.navigate('CreatePinScreen');
   };
 
   return (
     <>
-      <Appbar.Header style={{backgroundColor: '#02295F'}}>
+      <Appbar.Header style={{ backgroundColor: '#02295F' }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Sign In" />
         {/* <Appbar.Action icon="magnify" onPress={_handleSearch} />
@@ -142,8 +100,8 @@ const SignInScreen = ({navigation}) => {
                 },
               ]}
               autoCapitalize="none"
-              onChangeText={val => textInputChange(val)}
-              onEndEditing={e => handleValidUser(e.nativeEvent.text)}
+              onChangeText={val => setData({ ...data, email: val })}
+            // onEndEditing={e => handleValidUser(e.nativeEvent.text)}
             />
             {data.check_textInputChange ? (
               <Animatable.View animation="bounceIn">
@@ -182,14 +140,14 @@ const SignInScreen = ({navigation}) => {
                 },
               ]}
               autoCapitalize="none"
-              onChangeText={val => handlePasswordChange(val)}
+              onChangeText={val => setData({ ...data, password: val })}
             />
             <TouchableOpacity onPress={updateSecureTextEntry}>
               {data.secureTextEntry ? (
                 <Feather name="eye-off" color="grey" size={20} />
               ) : (
-                <Feather name="eye" color="grey" size={20} />
-              )}
+                  <Feather name="eye" color="grey" size={20} />
+                )}
             </TouchableOpacity>
           </View>
           {data.isValidPassword ? null : (
@@ -201,42 +159,54 @@ const SignInScreen = ({navigation}) => {
           )}
 
           <TouchableOpacity>
-            <Text style={{color: '#02295F', marginTop: 15}}>
+            <Text style={{ color: '#02295F', marginTop: 15 }}>
               Forgot password?
             </Text>
           </TouchableOpacity>
 
-          <View style={{marginTop: 50}}>
-            <TouchableOpacity
-              onPress={() => loginHandle(data.username, data.password)}
-              style={{
-                width: '100%',
-                //borderColor: '#1749FF',
-                // borderWidth: 2,
-                backgroundColor: '#02295F',
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 5,
-                padding: 14,
-                elevation: 5,
-              }}>
-              <Text
+          {
+            !data.isLoading && (<View style={{ marginTop: 50 }}>
+              <TouchableOpacity
+                onPress={loginHandle}
                 style={{
-                  fontFamily: 'BlissPro-Bold',
-                  color: '#fff',
-                  // opacity: 0.8,
+                  width: '100%',
+                  //borderColor: '#1749FF',
+                  // borderWidth: 2,
+                  backgroundColor: '#02295F',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: 5,
+                  padding: 14,
+                  elevation: 5,
                 }}>
-                SIGN IN
+                <Text
+                  style={{
+                    fontFamily: 'BlissPro-Bold',
+                    color: '#fff',
+                    // opacity: 0.8,
+                  }}>
+                  SIGN IN
               </Text>
-            </TouchableOpacity>
-          </View>
+              </TouchableOpacity>
+            </View>)
+          }
+
+          {data.isErr && <ErrorMsg msg={data.errMsg} />}
+          {data.isLoading && <ActivityIndicator style={{ marginTop: 20 }} size="large" color="#1749FF" />}
         </View>
       </View>
     </>
   );
 };
 
-export default SignInScreen;
+
+export default connect(
+  state => ({
+    details: state,
+  }), {
+  signIn
+}
+)(SignInScreen);
 
 const styles = StyleSheet.create({
   container: {

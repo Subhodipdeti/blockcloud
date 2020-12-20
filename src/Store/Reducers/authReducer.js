@@ -1,15 +1,15 @@
-// import * as All from '../Actions/ActionTypes';
+import * as All from '../Actions/actionTypes';
 
 const initState = {
     authError: false,
     authState: '',
     authMessage: '',
-    data: [],
+    data: {},
   };
   
   const authReducer = (state = initState, action) => {
     switch (action.type) {
-      case 'LOGIN_SUCCESSFULLY':
+      case All.LOGIN_SUCCESSFULLY:
         console.log('Login Success');
         return {
           ...state,

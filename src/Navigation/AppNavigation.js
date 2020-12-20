@@ -76,8 +76,7 @@ const App = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <StatusBar backgroundColor="rgba(25, 42, 86, 0.9)" />
-      <RootStackScreen />
-      {/* {loginState.userToken && loginState.value ? (
+      {loginState.userToken && loginState.value ? (
         <CreatePinScreen
           token={loginState.userToken}
           isRenterPin={loginState.isRenterPin}
@@ -86,7 +85,7 @@ const App = () => {
         <RootStackScreen />
       ) : (
             <AuthStack />
-          )} */}
+          )}
     </NavigationContainer>
   );
 };

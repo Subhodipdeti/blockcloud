@@ -3,8 +3,10 @@ import {View, ScrollView, TouchableOpacity} from 'react-native';
 import {Appbar, Title, List as PaperList} from 'react-native-paper';
 import {Text, Switch} from 'native-base';
 import useAppTheme from '../../Themes/Context';
+import { connect } from 'react-redux';
 
-export default ({navigation}) => {
+const SeetingsScreen = ({navigation, userDetails}) => {
+  console.log('====>>>>//', userDetails?.auth?.data)
   const { theme } = useAppTheme();
   return (
     <>
@@ -59,7 +61,7 @@ export default ({navigation}) => {
                 fontSize: 18,
                 opacity: 0.5,
               }}>
-              3c9984d0-dbf1-4124-93b9-041fc8f4cb14
+              {userDetails?.auth?.data?.guid}
             </Text>
           </View>
 
@@ -78,7 +80,7 @@ export default ({navigation}) => {
                 fontSize: 18,
                 opacity: 0.5,
               }}>
-              abc123@gmail.com
+             {userDetails?.auth?.data?.email}
             </Text>
           </View>
 
@@ -317,3 +319,10 @@ export default ({navigation}) => {
     </>
   );
 };
+
+export default connect(
+  state => ({
+    userDetails: state,
+  }), {
+}
+)(SeetingsScreen);

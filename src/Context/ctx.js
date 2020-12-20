@@ -79,7 +79,7 @@ export const AppContextProvider = props => {
         // setUserToken(null);
         // setIsLoading(false);
         try {
-          await AsyncStorage.removeItem('@blockchain_Key');
+          await AsyncStorage.multiRemove(['@blockchain_Key', '@blockchain_user']);
         } catch (e) {
           console.log(e);
         }
