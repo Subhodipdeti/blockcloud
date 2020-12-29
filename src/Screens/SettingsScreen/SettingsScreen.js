@@ -1,13 +1,20 @@
 import React from 'react';
-import {View, ScrollView, TouchableOpacity} from 'react-native';
+import {View, ScrollView, TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
 import {Appbar, Title, List as PaperList} from 'react-native-paper';
 import {Text, Switch} from 'native-base';
 import useAppTheme from '../../Themes/Context';
 import { connect } from 'react-redux';
+import Clipboard from '@react-native-community/clipboard';
+import Toast from 'react-native-simple-toast';
 
 const SeetingsScreen = ({navigation, userDetails}) => {
   console.log('====>>>>//', userDetails?.auth?.data)
   const { theme } = useAppTheme();
+
+  const copyToClipboard = (address) => {
+    Clipboard.setString(address);
+    Toast.show('Copied to Clipboard')
+  };
   return (
     <>
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
@@ -55,6 +62,7 @@ const SeetingsScreen = ({navigation, userDetails}) => {
               }}>
               Wallet ID
             </Title>
+            <TouchableOpacity onLongPress={() => copyToClipboard(userDetails?.auth?.data?.guid)}>
             <Text
               style={{
                 fontFamily: 'BlissPro',
@@ -63,6 +71,7 @@ const SeetingsScreen = ({navigation, userDetails}) => {
               }}>
               {userDetails?.auth?.data?.guid}
             </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={{marginTop: 15}}>

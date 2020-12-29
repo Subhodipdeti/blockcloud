@@ -19,8 +19,27 @@ async function setUserDetails(data) {
     }
 }
 
+async function setWalletVerified(isVerified) {
+    try {
+        await AsyncStorage.setItem('@blockchain_user_isverifiedwallet', isVerified);
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+async function getWalletVerified() {
+    try {
+       let userBalance = await AsyncStorage.getItem('@blockchain_user_isverifiedwallet');
+       return userBalance;
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 export {
     getUserDetails,
-    setUserDetails
+    setUserDetails,
+    setWalletVerified,
+    getWalletVerified,
 }
 

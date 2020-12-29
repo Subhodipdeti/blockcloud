@@ -28,5 +28,52 @@ const loginUser = data => {
             });
     });
 }
+const getWalletBalance = (id, password) => {
+    return new Promise((resolve, reject) => {
+        let bodyFormData = new FormData();
+        bodyFormData.append('userId', Number(id));
+        bodyFormData.append('password', password);
+        axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/getwallet.json', bodyFormData)
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
 
-export { createUser, loginUser };
+
+const createPayment = (userId, password, toUserId, amounts, fee) => {
+    return new Promise((resolve, reject) => {
+        let bodyFormData = new FormData();
+        bodyFormData.append('userId', userId);
+        bodyFormData.append('password', password);
+        bodyFormData.append('toUserId', toUserId);
+        bodyFormData.append('amounts', amounts);
+        bodyFormData.append('fee', fee);
+       
+        axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/makepayment.json', bodyFormData)
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+
+const getUser = (email) => {
+    return new Promise((resolve, reject) => {
+        let bodyFormData = new FormData();
+        bodyFormData.append('email', email);
+   
+        axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/getuser.json', bodyFormData)
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+export { createUser, loginUser, getWalletBalance, createPayment, getUser };

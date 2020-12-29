@@ -1,11 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet, Alert
 } from 'react-native';
 import { Title } from 'react-native-paper';
 import { ProgressCircle, StackedAreaChart } from 'react-native-svg-charts';
@@ -21,13 +21,81 @@ import Header from '../../Components/Header';
 import { connect } from 'react-redux';
 import { signIn } from '../../Store/Actions/authActions';
 import useAppTheme from '../../Themes/Context';
-import { getUserDetails } from '../../Services/AsyncStorage';
+import { getUserDetails, getWalletVerified } from '../../Services/AsyncStorage';
+import { getWalletBalance } from '../../Services/Api';
 
 const Tab = createMaterialTopTabNavigator();
 
-function MyTabs() {
+
+import Animated from 'react-native-reanimated';
+
+function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
   return (
-    <Tab.Navigator>
+    <View style={{ flexDirection: 'row' }}>
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label =
+          options.tabBarLabel !== undefined
+            ? options.tabBarLabel
+            : options.title !== undefined
+            ? options.title
+            : route.name;
+
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+          console.log('===>>####', route?.name);
+          onChangeTab(route?.name)
+        };
+
+        const onLongPress = () => {
+          navigation.emit({
+            type: 'tabLongPress',
+            target: route.key,
+          });
+        };
+
+        const inputRange = state.routes.map((_, i) => i);
+        const opacity = Animated.interpolate(position, {
+          inputRange,
+          outputRange: inputRange.map(i => (i === index ? 1 : 0)),
+        });
+
+        return (
+          <TouchableOpacity
+          
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+            testID={options.tabBarTestID}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={{ flex: 1, borderBottomColor: isFocused ? '#000' : '#fff', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2 }}
+          >
+            <Animated.Text style={{ opacity: 1 }}>
+              {label}
+            </Animated.Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
+
+function MyTabs({ onChangeTab }) {
+ 
+  return (
+    <Tab.Navigator tabBar={props => <MyTabBar {...props} onChangeTab={onChangeTab} />}>
       <Tab.Screen name="1D" component={ListView} />
       <Tab.Screen name="1W" component={ListView} />
       <Tab.Screen name="1M" component={ListView} />
@@ -73,7 +141,10 @@ const CircleChart = () => {
 };
 
 const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
+  const [isVerified, setisVerified] = useState(false);
+  const [toataBalance, settoataBalance] = useState(null);
   console.log('===>>', details?.auth?.data);
+ 
   const chartConfig = {
     backgroundColor: '#fff',
     backgroundGradientFrom: '#fff',
@@ -96,13 +167,54 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
       .then(userDetails => {
         if (userDetails) {
           signIn(userDetails);
+          console.log('==={}{}', userDetails?.id, userDetails?.userPassword)
+          fetchWalletBalance(userDetails?.id, userDetails?.userPassword)
         }
       })
   }, [])
 
+  const fetchWalletBalance = async (id, userPassword) => {
+    getWalletBalance(id, userPassword)
+    .then(res => {
+      if(res?.data?.data?.ack != 0){
+        console.log('===>?>?>?>', res?.data?.data)
+        settoataBalance(res?.data?.data?.data);
+        setisVerified(true);
+      }
+    })
+    .catch(err => console.log(err))
+  }
+
+  const onChangeWalletBalance = () => {
+    const {id, userPassword} = details?.auth?.data
+    getWalletBalance(id, userPassword)
+    .then(res => {
+      if(res?.data?.data?.ack != 1){
+        // settoataBalance(res?.data?.data?.data);
+        setisVerified(false);
+        Alert.alert(
+          "Message",
+          res?.data?.data?.msg,
+          [
+            { text: "OK", onPress: () => console.log("OK Pressed") }
+          ],
+          { cancelable: false }
+        );
+        return;
+      }
+      settoataBalance(res?.data?.data?.data);
+      setisVerified(true);
+    })
+    .catch(err => console.log(err))
+  }
+
   const refRBSheet = useRef();
 
   const { theme } = useAppTheme();
+
+  const onChangeTab = data => {
+    console.log('===>>>???', data)
+  }
 
   function PriceCard() {
     const cards = [1, 2, 3];
@@ -240,10 +352,18 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
       <Header navigation={navigation} title="Dashboard" screenName="Home" />
       <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <View style={styles.totalAreaContainer}>
-          <View>
+          <View style={{ width: '70%'}}>
             <Text style={styles.totalBalanceText}>Total Balance</Text>
-            <Title style={styles.totalAreaShortText}>15.00</Title>
-            <Text style={styles.totalAreaColorText}>0.00 (--)</Text>
+  <Title style={styles.totalAreaShortText}>{toataBalance}</Title>
+            {/* <Text style={styles.totalAreaColorText}>0.00 (--)</Text> */}
+           {
+             !isVerified && <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 20 }}>
+             <Text style={{ fontFamily: 'BlissPro', color: '#CE5404'}}>Couldn't fetch the wallet Balance, please try again</Text>
+             <TouchableOpacity onPress={onChangeWalletBalance}>
+             <Icon name="reload" color="#000" size={20} />
+             </TouchableOpacity>
+             </View>
+           }
           </View>
           <View style={{ width: '30%' }}>{CircleChart()}</View>
         </View>
@@ -284,6 +404,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
             </View>
           </View>
           <LineChart
+          style={{ marginBottom: 20 }}
             withDots={false}
             data={LineChartData}
             width={width}
@@ -291,7 +412,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
             chartConfig={chartConfig}
           />
 
-          <MyTabs />
+          <MyTabs onChangeTab={onChangeTab} />
         </RBSheet>
       </ScrollView>
     </>

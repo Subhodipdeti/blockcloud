@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {View, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
 import {Content, List, ListItem, Left, Body, Right, Text} from 'native-base';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
@@ -7,12 +7,14 @@ import {Title} from 'react-native-paper';
 import Header from '../../Components/Header';
 import Button from '../../Components/Button';
 import useAppTheme from '../../Themes/Context';
+import { TextInput } from 'react-native-paper';
+import SendScreen from './SendScreen/SendScreen';
 
 const Tab = createMaterialTopTabNavigator();
 
 const {height, width} = Dimensions.get('screen');
 
-function MyTabs({navigation}) {
+function MyTabs({navigation, details}) {
   return (
     <>
       <Header navigation={navigation} title="Transfer" screenName="Transfer" />
@@ -33,61 +35,12 @@ function MyTabs({navigation}) {
             borderRadius: 5,
           },
         }}>
-        <Tab.Screen name="Send" component={BuyScreen} />
+        <Tab.Screen name="Send" component={SendScreen} />
         <Tab.Screen name="Receive" component={SellScreen} />
       </Tab.Navigator>
     </>
   );
 }
-
-const BuyScreen = () => {
-  const { theme } = useAppTheme();
-  return (
-    <Content style={{ backgroundColor: theme.colors.background }}>
-      <View
-        style={{padding: 15, justifyContent: 'center', alignItems: 'center'}}>
-        <Title>No crypto to send</Title>
-        <Text
-          style={{
-            fontFamily: 'BlissPro',
-            opacity: 1,
-            textAlign: 'center',
-          }}>
-          Looks ike your wallets are empty, we can help you buy crypto
-        </Text>
-      </View>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: height / 3.5,
-        }}>
-        <View
-          style={{
-            borderColor: 'rgba(23, 73, 255, 0.5)',
-            borderWidth: 5,
-            backgroundColor: 'rgba(23, 73, 255, 1)',
-            height: 100,
-            width: 100,
-            borderRadius: 50,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Icon
-            type={ICON_TYPE.MATERIAL_COMMUNITY}
-            name="bitcoin"
-            size={50}
-            color="#fff"
-            style={{transform: [{rotate: '50deg'}]}}
-          />
-        </View>
-      </View>
-      <View style={{margin: 10}}>
-        <Button label="Buy Crypto" />
-      </View>
-    </Content>
-  );
-};
 
 const SellScreen = () => {
   const { theme } = useAppTheme();

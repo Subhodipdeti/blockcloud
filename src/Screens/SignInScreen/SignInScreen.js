@@ -62,8 +62,12 @@ const SignInScreen = ({ navigation,  details, signIn}) => {
       .then(res => {
         if (res?.data?.data?.ack != 0) {
           // console.log('==...', res?.data)
-          setUserDetails(res?.data?.data?.details)
-          signIn(res?.data?.data?.details)
+          const userData = {
+            ...res?.data?.data?.details,
+            userPassword: password
+          }
+          setUserDetails(userData);
+          signIn(userData);
           setData({ ...data, isLoading: false, isErr: false, errMsg: '' })
           navigation.navigate('CreatePinScreen');
           return;
