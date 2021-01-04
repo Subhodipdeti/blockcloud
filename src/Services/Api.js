@@ -51,7 +51,7 @@ const createPayment = (userId, password, toUserId, amounts, fee) => {
         bodyFormData.append('toUserId', toUserId);
         bodyFormData.append('amounts', amounts);
         bodyFormData.append('fee', fee);
-       
+
         axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/makepayment.json', bodyFormData)
             .then((response) => {
                 resolve(response);
@@ -66,7 +66,7 @@ const getUser = (email) => {
     return new Promise((resolve, reject) => {
         let bodyFormData = new FormData();
         bodyFormData.append('email', email);
-   
+
         axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/getuser.json', bodyFormData)
             .then((response) => {
                 resolve(response);
@@ -76,4 +76,16 @@ const getUser = (email) => {
     });
 }
 
-export { createUser, loginUser, getWalletBalance, createPayment, getUser };
+
+const getChartData = (startDate) => {
+    return new Promise((resolve, reject) => {
+        axios.get(`https://api.blockchain.info/charts/transactions-per-second?timespan=5weeks&rollingAverage=8hours&start=${startDate}&format=json`)
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+export { createUser, loginUser, getWalletBalance, createPayment, getUser, getChartData };

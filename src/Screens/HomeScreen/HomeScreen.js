@@ -5,7 +5,7 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  StyleSheet, Alert
+  StyleSheet, Alert,
 } from 'react-native';
 import { Title } from 'react-native-paper';
 import { ProgressCircle, StackedAreaChart } from 'react-native-svg-charts';
@@ -16,18 +16,20 @@ import { LineChart } from 'react-native-chart-kit';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import ListView from './ListView';
 import styles from './styles';
-import { LineChartData, StackedAreaChartData } from '../../Models/index';
+import { StackedAreaChartData } from '../../Models/index';
 import Header from '../../Components/Header';
 import { connect } from 'react-redux';
 import { signIn } from '../../Store/Actions/authActions';
 import useAppTheme from '../../Themes/Context';
 import { getUserDetails, getWalletVerified } from '../../Services/AsyncStorage';
-import { getWalletBalance } from '../../Services/Api';
+import { getWalletBalance, getChartData } from '../../Services/Api';
+import moment from 'moment';
 
 const Tab = createMaterialTopTabNavigator();
 
 
 import Animated from 'react-native-reanimated';
+
 
 function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
   return (
@@ -38,8 +40,8 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
-            ? options.title
-            : route.name;
+              ? options.title
+              : route.name;
 
         const isFocused = state.index === index;
 
@@ -72,7 +74,7 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
 
         return (
           <TouchableOpacity
-          
+
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -93,7 +95,7 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
 
 
 function MyTabs({ onChangeTab }) {
- 
+
   return (
     <Tab.Navigator tabBar={props => <MyTabBar {...props} onChangeTab={onChangeTab} />}>
       <Tab.Screen name="1D" component={ListView} />
@@ -140,125 +142,93 @@ const CircleChart = () => {
   );
 };
 
-const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
-  const [isVerified, setisVerified] = useState(false);
-  const [toataBalance, settoataBalance] = useState(null);
-  console.log('===>>', details?.auth?.data);
- 
-  const chartConfig = {
-    backgroundColor: '#fff',
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    decimalPlaces: 2, // optional, defaults to 2dp
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForDots: {
-      r: '6',
-      strokeWidth: '2',
-      stroke: '#ffa726',
-    },
-  };
 
-  useEffect(() => {
-    getUserDetails()
-      .then(userDetails => {
-        if (userDetails) {
-          signIn(userDetails);
-          console.log('==={}{}', userDetails?.id, userDetails?.userPassword)
-          fetchWalletBalance(userDetails?.id, userDetails?.userPassword)
-        }
-      })
-  }, [])
 
-  const fetchWalletBalance = async (id, userPassword) => {
-    getWalletBalance(id, userPassword)
-    .then(res => {
-      if(res?.data?.data?.ack != 0){
-        console.log('===>?>?>?>', res?.data?.data)
-        settoataBalance(res?.data?.data?.data);
-        setisVerified(true);
-      }
-    })
-    .catch(err => console.log(err))
-  }
-
-  const onChangeWalletBalance = () => {
-    const {id, userPassword} = details?.auth?.data
-    getWalletBalance(id, userPassword)
-    .then(res => {
-      if(res?.data?.data?.ack != 1){
-        // settoataBalance(res?.data?.data?.data);
-        setisVerified(false);
-        Alert.alert(
-          "Message",
-          res?.data?.data?.msg,
-          [
-            { text: "OK", onPress: () => console.log("OK Pressed") }
-          ],
-          { cancelable: false }
-        );
-        return;
-      }
-      settoataBalance(res?.data?.data?.data);
-      setisVerified(true);
-    })
-    .catch(err => console.log(err))
-  }
-
-  const refRBSheet = useRef();
-
-  const { theme } = useAppTheme();
-
-  const onChangeTab = data => {
-    console.log('===>>>???', data)
-  }
-
-  function PriceCard() {
-    const cards = [1, 2, 3];
-    return cards.map((item, index) => {
-      return (
-        <View style={styles.priceContainer} key={index}>
-          <View style={styles.priceOuterCard}>
-            <View style={styles.priceBadgeIcon}>
-              <Title style={{ color: '#fff' }}>$</Title>
-            </View>
-            <View>
-              <Title style={styles.priceCardTitle}>US Dollars</Title>
-              <Text
-                style={{
-                  fontFamily: 'BlissPro-Bold',
-                  opacity: 0.5,
-                }}>
-                USD
-              </Text>
-            </View>
-            <View>
-              <Title
-                style={{
-                  fontFamily: 'BlissPro',
-                  fontSize: 18,
-                  opacity: 0.5,
-                }}>
-                0.00
-              </Title>
-              <Text
-                style={{
-                  fontFamily: 'BlissPro',
-                  opacity: 0.5,
-                }}>
-                US$0.00
-              </Text>
-            </View>
+function PriceCard() {
+  const cards = [1, 2, 3];
+  return cards.map((item, index) => {
+    return (
+      <View style={styles.priceContainer} key={index}>
+        <View style={styles.priceOuterCard}>
+          <View style={styles.priceBadgeIcon}>
+            <Title style={{ color: '#fff' }}>$</Title>
+          </View>
+          <View>
+            <Title style={styles.priceCardTitle}>US Dollars</Title>
+            <Text
+              style={{
+                fontFamily: 'BlissPro-Bold',
+                opacity: 0.5,
+              }}>
+              USD
+            </Text>
+          </View>
+          <View>
+            <Title
+              style={{
+                fontFamily: 'BlissPro',
+                fontSize: 18,
+                opacity: 0.5,
+              }}>
+              0.00
+            </Title>
+            <Text
+              style={{
+                fontFamily: 'BlissPro',
+                opacity: 0.5,
+              }}>
+              US$0.00
+            </Text>
           </View>
         </View>
-      );
-    });
+      </View>
+    );
+  });
+}
+
+const chartConfig = {
+  backgroundColor: '#fff',
+  backgroundGradientFrom: '#fff',
+  backgroundGradientTo: '#fff',
+  decimalPlaces: 2, // optional, defaults to 2dp
+  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  style: {
+    borderRadius: 16,
+  },
+  propsForDots: {
+    r: '6',
+    strokeWidth: '2',
+    stroke: '#ffa726',
+  },
+};
+
+
+class HomeScreen extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isVerified: false,
+      toataBalance: '',
+      LineChartData: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        datasets: [
+          {
+            data: [
+              Math.random() * 100,
+              Math.random() * 100,
+            ],
+            color: (opacity = 5) => `rgba(255,69,0, 8)`, // optional
+            strokeWidth: 2, // optional
+          },
+        ],
+      }
+    }
   }
 
-  function ChartCard() {
+
+
+  ChartCard = () => {
     const cards = [1, 2];
     return cards.map((item, index) => {
 
@@ -266,7 +236,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
         <TouchableOpacity
           key={index}
           style={styles.chartContainer}
-          onPress={() => refRBSheet.current.open()}>
+          onPress={() => this.refRBSheet.open()}>
           <View style={styles.chartOuterCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
@@ -282,7 +252,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
                   opacity: 1,
                 }}>
                 Bitcoin
-              </Title>
+            </Title>
             </View>
 
             <View style={{ width: '30%' }}>{LineChartpreview()}</View>
@@ -296,14 +266,14 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
                   opacity: 0.8,
                 }}>
                 $0.00
-              </Text>
+            </Text>
               <Text
                 style={{
                   fontFamily: 'BlissPro',
                   opacity: 0.5,
                 }}>
                 0 BTC
-              </Text>
+            </Text>
             </View>
 
             <View style={{ flexDirection: 'row' }}>
@@ -321,7 +291,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
                     opacity: 0.6,
                   }}>
                   $14,176.86
-                </Text>
+              </Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                   <Text
                     style={{
@@ -337,7 +307,7 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
                       opacity: 0.6,
                     }}>
                     24hrs
-                  </Text>
+                </Text>
                 </View>
               </View>
             </View>
@@ -347,76 +317,261 @@ const HomeScreen = ({ navigation, getData, userData, details, signIn }) => {
     });
   }
 
-  return (
-    <>
-      <Header navigation={navigation} title="Dashboard" screenName="Home" />
-      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <View style={styles.totalAreaContainer}>
-          <View style={{ width: '70%'}}>
-            <Text style={styles.totalBalanceText}>Total Balance</Text>
-  <Title style={styles.totalAreaShortText}>{toataBalance}</Title>
-            {/* <Text style={styles.totalAreaColorText}>0.00 (--)</Text> */}
-           {
-             !isVerified && <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 20 }}>
-             <Text style={{ fontFamily: 'BlissPro', color: '#CE5404'}}>Couldn't fetch the wallet Balance, please try again</Text>
-             <TouchableOpacity onPress={onChangeWalletBalance}>
-             <Icon name="reload" color="#000" size={20} />
-             </TouchableOpacity>
-             </View>
-           }
+
+  fetchWalletBalance = async (id, userPassword) => {
+    getWalletBalance(id, userPassword)
+      .then(res => {
+        if (res?.data?.data?.ack != 0) {
+          this.setState({ toataBalance: res?.data?.data?.data, isVerified: true })
+
+        }
+      })
+      .catch(err => console.log(err))
+  }
+
+  onChangeWalletBalance = () => {
+    const { id, userPassword } = this.props.details?.auth?.data
+    getWalletBalance(id, userPassword)
+      .then(res => {
+        if (res?.data?.data?.ack != 1) {
+          // settoataBalance(res?.data?.data?.data);
+
+          this.setState({ isVerified: false })
+          Alert.alert(
+            "Message",
+            res?.data?.data?.msg,
+            [
+              { text: "OK", onPress: () => console.log("OK Pressed") }
+            ],
+            { cancelable: false }
+          );
+          return;
+        }
+        this.setState({ toataBalance: res?.data?.data?.data, isVerified: true })
+
+      })
+      .catch(err => console.log(err))
+  }
+
+  componentDidMount() {
+    getUserDetails()
+      .then(userDetails => {
+        if (userDetails) {
+          this.props.signIn(userDetails);
+          console.log('==={}{}', userDetails?.id, userDetails?.userPassword)
+          this.fetchWalletBalance(userDetails?.id, userDetails?.userPassword)
+        }
+      })
+    console.log('===>>', moment.unix(1609377300).format('DD-MM-YYYY'));
+
+    const firstLabels = [moment(Date.now()).subtract({ hours: 6 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 5 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 4 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 3 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 2 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 1 }).format('h:mm')];
+    this.onChangeHandleChart(firstLabels, '1D');
+  }
+
+
+  onChangeHandleChart = (labels, type) => {
+
+    const LineChartData = {
+      labels: labels,
+
+      datasets: [
+        {
+          data: [
+            Math.random() * 1
+          ],
+          color: (opacity = 5) => `rgba(255,69,0, 8)`, // optional
+          strokeWidth: 2, // optional
+        },
+      ],
+    }
+
+    let fiterByDate;
+
+    switch (type) {
+      case '1D':
+        fiterByDate = moment(Date.now()).subtract({ hours: 6 }).format('YYYY-MM-DD');
+        break;
+
+      case '1W':
+        fiterByDate = moment(Date.now()).subtract({ day: 6 }).format('YYYY-MM-DD');
+        break;
+
+      case '1M':
+        fiterByDate = moment(Date.now()).subtract({ month: 5 }).format('YYYY-MM-DD');
+        break;
+
+      case '1Y':
+        fiterByDate = moment(Date.now()).subtract({ month: 9 }).format('YYYY-MM-DD');
+        break;
+
+      case 'All':
+        fiterByDate = moment(Date.now()).subtract({ month: 11 }).format('YYYY-MM-DD');
+        break;
+
+      default:
+        break;
+    }
+
+
+
+    getChartData(fiterByDate)
+      .then(res => {
+        // console.log('===>>>//', Math.round(res?.data?.values?.length / 6));
+        res?.data?.values?.forEach(data => {
+          // console.log('====>>>>>', data?.y)
+          LineChartData.datasets[0].data.push(data?.y)
+
+        })
+        this.setState({ LineChartData })
+      })
+      .catch(err => console.log(err));
+  }
+
+  onChangeTab = key => {
+
+    const firstLabels = [moment(Date.now()).subtract({ hours: 6 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 5 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 4 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 3 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 2 }).format('h:mm'),
+    moment(Date.now()).subtract({ hours: 1 }).format('h:mm')];
+
+
+    const seconedLabels = [moment(Date.now()).subtract({ day: 6 }).format('DD. MMM'),
+    moment(Date.now()).subtract({ day: 4 }).format('DD. MMM'),
+    moment(Date.now()).subtract({ day: 2 }).format('DD. MMM'),
+    moment(Date.now()).format('DD. MMM')];
+
+    const thirdLabels = [
+      moment(Date.now()).subtract({ day: 28 }).format('DD. MMM'),
+      moment(Date.now()).subtract({ day: 23 }).format('DD. MMM'),
+      moment(Date.now()).subtract({ day: 18 }).format('DD. MMM'),
+      moment(Date.now()).subtract({ day: 14 }).format('DD. MMM'),
+      moment(Date.now()).subtract({ day: 7 }).format('DD. MMM'),
+      moment(Date.now()).subtract({ day: 1 }).format('DD. MMM')
+    ];
+    const fourthLabels = [moment(Date.now()).subtract({ month: 11 }).format('MMM. YY'),
+    moment(Date.now()).subtract({ month: 9 }).format('MMM. YY'),
+    moment(Date.now()).subtract({ month: 7 }).format('MMM. YY'),
+    moment(Date.now()).subtract({ month: 5 }).format('MMM. YY'),
+    moment(Date.now()).subtract({ month: 3 }).format('MMM. YY'),
+    moment(Date.now()).subtract({ month: 1 }).format('MMM. YY')];
+
+    const fifthLables = [moment(Date.now()).subtract({ year: 9 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 8 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 7 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 6 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 5 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 4 }).format('YYYY'),
+    moment(Date.now()).subtract({ year: 3 }).format('YYYY')];
+
+    switch (key) {
+      case '1D':
+        this.onChangeHandleChart(firstLabels, '1D');
+        return;
+
+      case '1W':
+        this.onChangeHandleChart(seconedLabels, '1W');
+        return;
+
+      case '1M':
+        this.onChangeHandleChart(thirdLabels, '1M');
+        return;
+
+      case '1Y':
+        this.onChangeHandleChart(fourthLabels, '1Y');
+        return;
+
+      case 'All':
+        this.onChangeHandleChart(fifthLables, 'All');
+        return;
+
+      default:
+        return;
+    }
+  }
+
+
+
+  render() {
+    const { navigation } = this.props;
+    const { toataBalance, isVerified, LineChartData } = this.state;
+    return (
+      <>
+        <Header navigation={navigation} title="Dashboard" screenName="Home" />
+        <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <View style={styles.totalAreaContainer}>
+            <View style={{ width: '70%' }}>
+              <Text style={styles.totalBalanceText}>Total Balance</Text>
+              <Title style={styles.totalAreaShortText}>{toataBalance}</Title>
+              {/* <Text style={styles.totalAreaColorText}>0.00 (--)</Text> */}
+              {
+                !isVerified && <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 20 }}>
+                  <Text style={{ fontFamily: 'BlissPro', color: '#CE5404' }}>Couldn't fetch the wallet Balance, please try again</Text>
+                  <TouchableOpacity onPress={this.onChangeWalletBalance}>
+                    <Icon name="reload" color="#000" size={20} />
+                  </TouchableOpacity>
+                </View>
+              }
+            </View>
+            <View style={{ width: '30%' }}>{CircleChart()}</View>
           </View>
-          <View style={{ width: '30%' }}>{CircleChart()}</View>
-        </View>
 
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          {PriceCard()}
-        </ScrollView>
-        {ChartCard()}
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            {PriceCard()}
+          </ScrollView>
+          {this.ChartCard()}
 
 
-        <RBSheet closeOnDragDown={true} ref={refRBSheet} height={height / 1.5}>
-          <View style={{ alignItems: 'center' }}>
-            <Text
-              style={{
-                fontFamily: 'BlissPro',
-                opacity: 0.5,
-              }}>
-              Current BTC Price
-            </Text>
-            <Title>$14, 043.36</Title>
-            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-              <Text
-                style={{
-                  color: '#D63031',
-                  fontFamily: 'BlissPro',
-                  opacity: 0.8,
-                }}>
-                -$462.78 (-3.2%)
-              </Text>
+          <RBSheet closeOnDragDown={true} ref={ref => this.refRBSheet = ref} height={height / 1.5}>
+            <View style={{ alignItems: 'center' }}>
               <Text
                 style={{
                   fontFamily: 'BlissPro',
                   opacity: 0.5,
                 }}>
-                {' '}
-                Last day
+                Current BTC Price
               </Text>
+              <Title>$14, 043.36</Title>
+              <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                <Text
+                  style={{
+                    color: '#D63031',
+                    fontFamily: 'BlissPro',
+                    opacity: 0.8,
+                  }}>
+                  -$462.78 (-3.2%)
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'BlissPro',
+                    opacity: 0.5,
+                  }}>
+                  {' '}
+                  Last day
+                </Text>
+              </View>
             </View>
-          </View>
-          <LineChart
-          style={{ marginBottom: 20 }}
-            withDots={false}
-            data={LineChartData}
-            width={width}
-            height={180}
-            chartConfig={chartConfig}
-          />
 
-          <MyTabs onChangeTab={onChangeTab} />
-        </RBSheet>
-      </ScrollView>
-    </>
-  );
+            <LineChart
+              style={{ marginBottom: 20 }}
+              withDots={false}
+              data={LineChartData}
+              width={width}
+              height={180}
+              chartConfig={chartConfig}
+            />
+            <MyTabs onChangeTab={this.onChangeTab} />
+          </RBSheet>
+        </ScrollView>
+      </>
+    );
+  }
 };
 
 export default connect(
