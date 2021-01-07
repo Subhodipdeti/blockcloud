@@ -4,6 +4,7 @@ import {Appbar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {List, ListItem, Left, Body, Right, Text} from 'native-base';
 import useAppTheme from '../../Themes/Context';
+import styles from './styles';
 
 export default ({navigation}) => {
   const { theme } = useAppTheme();
@@ -12,29 +13,21 @@ export default ({navigation}) => {
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Text
-          style={{fontFamily: 'BlissPro-Bold', fontSize: 18, color: '#fff'}}>
+          style={styles.airdropText}>
           Airdrops
         </Text>
       </Appbar.Header>
       <ScrollView style={{ backgroundColor: theme.colors.background }}>
-        <View style={{margin: 10}}>
+        <View style={styles.defaultMargin}>
           <Text
-            style={{
-              fontFamily: 'BlissPro',
-              opacity: 0.6,
-              fontSize: 18,
-              color: '#000',
-            }}>
+            style={styles.activeTextStyle}>
             Active
           </Text>
         </View>
         <View style={{margin: 10}}>
           <Text
             style={{
-              fontFamily: 'BlissPro',
-              opacity: 0.6,
-              fontSize: 18,
-              color: '#000',
+              
             }}>
             Ended
           </Text>

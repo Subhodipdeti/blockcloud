@@ -62,14 +62,14 @@ const SeetingsScreen = ({navigation, userDetails}) => {
               }}>
               Wallet ID
             </Title>
-            <TouchableOpacity onLongPress={() => copyToClipboard(userDetails?.auth?.data?.guid)}>
+            <TouchableOpacity onLongPress={() => copyToClipboard(userDetails?.auth?.data?.address)}>
             <Text
               style={{
                 fontFamily: 'BlissPro',
                 fontSize: 18,
                 opacity: 0.5,
               }}>
-              {userDetails?.auth?.data?.guid}
+              {userDetails?.auth?.data?.address}
             </Text>
             </TouchableOpacity>
           </View>

@@ -48,7 +48,7 @@ const createPayment = (userId, password, toUserId, amounts, fee) => {
         let bodyFormData = new FormData();
         bodyFormData.append('userId', userId);
         bodyFormData.append('password', password);
-        bodyFormData.append('toUserId', toUserId);
+        bodyFormData.append('toAddress', toUserId);
         bodyFormData.append('amounts', amounts);
         bodyFormData.append('fee', fee);
 
@@ -88,4 +88,16 @@ const getChartData = (startDate) => {
     });
 }
 
-export { createUser, loginUser, getWalletBalance, createPayment, getUser, getChartData };
+
+const getCurrentBtcPrice = () => {
+    return new Promise((resolve, reject) => {
+        axios.get('https://blockchain.info/ticker')
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+export { createUser, loginUser, getWalletBalance, createPayment, getUser, getChartData, getCurrentBtcPrice };

@@ -6,7 +6,7 @@ export default ({label, color, style, mode, zeroMargin, onPress, loading}) => {
   const { theme } = useAppTheme();
   return (
     <TouchableOpacity style={[styles.container, { backgroundColor: theme.colors.primary }]} onPress={onPress}>
-      <Text style={[styles.textColor, { color: theme.colors.text }]}>{label}</Text>
+      <Text style={[styles.textColor, { color: color ? color : theme.colors.text }]}>{label}</Text>
     </TouchableOpacity>
   );
 };

@@ -4,6 +4,7 @@ import {Appbar, Title} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {List, ListItem, Left, Body, Right, Text} from 'native-base';
 import useAppTheme from '../../Themes/Context';
+import styles from './styles';
 
 export default ({navigation}) => {
   const { theme } = useAppTheme();
@@ -12,40 +13,28 @@ export default ({navigation}) => {
       <Appbar.Header style={{backgroundColor: '#192A56'}}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Text
-          style={{fontFamily: 'BlissPro-Bold', fontSize: 18, color: '#fff'}}>
+          style={styles.addressesText}>
           Addresses
         </Text>
       </Appbar.Header>
       <ScrollView style={{ backgroundColor: theme.colors.background }}>
-        <List style={{backgroundColor: '#6A89CC'}}>
+        <List style={styles.list}>
           <ListItem avatar noBorder>
             <Left>
               <View
-                style={{
-                  backgroundColor: '#fff',
-                  padding: 5,
-                  borderRadius: 100,
-                }}>
+                style={styles.listViewList}>
                 <Icon name="bitcoin" color="#1749FF" size={20} />
               </View>
             </Left>
             <Body>
               <Text
-                style={{
-                  fontFamily: 'BlissPro-Bold',
-                  color: '#fff',
-                  //opacity: 0.6,
-                }}>
+                style={styles.bitcoinText}>
                 BITCOIN
               </Text>
             </Body>
             <Right>
               <View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingTop: 10,
-                }}>
+                style={styles.rightText}>
                 <Icon name="chevron-down" size={20} color="#fff" />
               </View>
             </Right>
@@ -53,21 +42,10 @@ export default ({navigation}) => {
         </List>
 
         <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            margin: 10,
-            justifyContent: 'space-between',
-            marginTop: 30,
-          }}>
+          style={styles.walletOuterArea}>
           <View>
             <Text
-              style={{
-                fontFamily: 'BlissPro',
-                color: '#1749FF',
-                fontSize: 18,
-                opacity: 0.6,
-              }}>
+              style={styles.wlletText}>
               Wallets
             </Text>
           </View>
@@ -79,51 +57,26 @@ export default ({navigation}) => {
         </View>
 
         <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            margin: 10,
-            justifyContent: 'space-between',
-            marginTop: 30,
-          }}>
+          style={styles.outerArea}>
           <View>
             <Text
-              style={{
-                fontFamily: 'BlissPro',
-                // color: '#1749FF',
-                fontSize: 18,
-                opacity: 0.6,
-              }}>
+              style={styles.myBitcoinText}>
               My Bitcoin Wallet
             </Text>
           </View>
           <View>
             <Text
-              style={{
-                fontFamily: 'BlissPro',
-                opacity: 0.6,
-              }}>
+              style={styles.btcText}>
               Default 0 BTC
             </Text>
           </View>
         </View>
 
         <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            margin: 10,
-            justifyContent: 'space-between',
-            marginTop: 30,
-          }}>
+          style={styles.addressArea}>
           <View>
             <Text
-              style={{
-                fontFamily: 'BlissPro',
-                color: '#1749FF',
-                fontSize: 18,
-                opacity: 0.6,
-              }}>
+              style={styles.addressText}>
               imported Addresses
             </Text>
           </View>

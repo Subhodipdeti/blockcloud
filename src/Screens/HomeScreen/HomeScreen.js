@@ -1,47 +1,49 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
   View,
   Text,
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  StyleSheet, Alert,
+  Alert,
 } from 'react-native';
-import { Title } from 'react-native-paper';
-import { ProgressCircle, StackedAreaChart } from 'react-native-svg-charts';
+import {Title} from 'react-native-paper';
+import {ProgressCircle, StackedAreaChart} from 'react-native-svg-charts';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as shape from 'd3-shape';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import { LineChart } from 'react-native-chart-kit';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {LineChart} from 'react-native-chart-kit';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import ListView from './ListView';
 import styles from './styles';
-import { StackedAreaChartData } from '../../Models/index';
+import {StackedAreaChartData} from '../../Models/index';
 import Header from '../../Components/Header';
-import { connect } from 'react-redux';
-import { signIn } from '../../Store/Actions/authActions';
+import {connect} from 'react-redux';
+import {signIn} from '../../Store/Actions/authActions';
 import useAppTheme from '../../Themes/Context';
-import { getUserDetails, getWalletVerified } from '../../Services/AsyncStorage';
-import { getWalletBalance, getChartData } from '../../Services/Api';
+import {getUserDetails, getWalletVerified} from '../../Services/AsyncStorage';
+import {
+  getWalletBalance,
+  getChartData,
+  getCurrentBtcPrice,
+} from '../../Services/Api';
 import moment from 'moment';
 
 const Tab = createMaterialTopTabNavigator();
 
-
 import Animated from 'react-native-reanimated';
 
-
-function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
+function MyTabBar({state, descriptors, navigation, position, onChangeTab}) {
   return (
-    <View style={{ flexDirection: 'row' }}>
+    <View style={{flexDirection: 'row'}}>
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
+        const {options} = descriptors[route.key];
         const label =
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
-              ? options.title
-              : route.name;
+            ? options.title
+            : route.name;
 
         const isFocused = state.index === index;
 
@@ -56,7 +58,7 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
             navigation.navigate(route.name);
           }
           console.log('===>>####', route?.name);
-          onChangeTab(route?.name)
+          onChangeTab(route?.name);
         };
 
         const onLongPress = () => {
@@ -74,18 +76,20 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
 
         return (
           <TouchableOpacity
-
             accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityState={isFocused ? {selected: true} : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{ flex: 1, borderBottomColor: isFocused ? '#000' : '#fff', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2 }}
-          >
-            <Animated.Text style={{ opacity: 1 }}>
-              {label}
-            </Animated.Text>
+            style={{
+              flex: 1,
+              borderBottomColor: isFocused ? '#000' : '#fff',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderBottomWidth: 2,
+            }}>
+            <Animated.Text style={{opacity: 1}}>{label}</Animated.Text>
           </TouchableOpacity>
         );
       })}
@@ -93,11 +97,10 @@ function MyTabBar({ state, descriptors, navigation, position, onChangeTab }) {
   );
 }
 
-
-function MyTabs({ onChangeTab }) {
-
+function MyTabs({onChangeTab}) {
   return (
-    <Tab.Navigator tabBar={props => <MyTabBar {...props} onChangeTab={onChangeTab} />}>
+    <Tab.Navigator
+      tabBar={props => <MyTabBar {...props} onChangeTab={onChangeTab} />}>
       <Tab.Screen name="1D" component={ListView} />
       <Tab.Screen name="1W" component={ListView} />
       <Tab.Screen name="1M" component={ListView} />
@@ -107,21 +110,21 @@ function MyTabs({ onChangeTab }) {
   );
 }
 
-const { height, width } = Dimensions.get('screen');
+const {height, width} = Dimensions.get('screen');
 
 const LineChartpreview = () => {
   const colors = ['#1749FF', '#4834DF', '#30336B', '#3C40C6'];
   const keys = ['apples', 'bananas', 'cherries', 'dates'];
   const svgs = [
-    { onPress: () => console.log('apples') },
-    { onPress: () => console.log('bananas') },
-    { onPress: () => console.log('cherries') },
-    { onPress: () => console.log('dates') },
+    {onPress: () => console.log('apples')},
+    {onPress: () => console.log('bananas')},
+    {onPress: () => console.log('cherries')},
+    {onPress: () => console.log('dates')},
   ];
 
   return (
     <StackedAreaChart
-      style={{ height: 30 }}
+      style={{height: 30}}
       data={StackedAreaChartData}
       keys={keys}
       colors={colors}
@@ -132,17 +135,15 @@ const LineChartpreview = () => {
   );
 };
 
-const CircleChart = () => {
+const CircleChart = btcData => {
   return (
     <ProgressCircle
-      style={{ height: 100 }}
-      progress={0.4}
+      style={{height: 100}}
+      progress={btcData ? btcData : 0}
       progressColor={'rgba(23, 73, 255, 1)'}
     />
   );
 };
-
-
 
 function PriceCard() {
   const cards = [1, 2, 3];
@@ -151,7 +152,7 @@ function PriceCard() {
       <View style={styles.priceContainer} key={index}>
         <View style={styles.priceOuterCard}>
           <View style={styles.priceBadgeIcon}>
-            <Title style={{ color: '#fff' }}>$</Title>
+            <Title style={{color: '#fff'}}>$</Title>
           </View>
           <View>
             <Title style={styles.priceCardTitle}>US Dollars</Title>
@@ -203,46 +204,41 @@ const chartConfig = {
   },
 };
 
-
 class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isVerified: false,
       toataBalance: '',
+      currentBitcoinPrice: '',
+      btcData: '',
       LineChartData: {
         labels: ['January', 'February', 'March', 'April', 'May', 'June'],
         datasets: [
           {
-            data: [
-              Math.random() * 100,
-              Math.random() * 100,
-            ],
+            data: [Math.random() * 100, Math.random() * 100],
             color: (opacity = 5) => `rgba(255,69,0, 8)`, // optional
             strokeWidth: 2, // optional
           },
         ],
-      }
-    }
+      },
+    };
   }
-
-
 
   ChartCard = () => {
     const cards = [1, 2];
     return cards.map((item, index) => {
-
       return (
         <TouchableOpacity
           key={index}
           style={styles.chartContainer}
           onPress={() => this.refRBSheet.open()}>
           <View style={styles.chartOuterCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <View
                 style={[
                   styles.chartInnerCard,
-                  { backgroundColor: index == 1 ? '#FAC42F' : '#45CE30' },
+                  {backgroundColor: index == 1 ? '#FAC42F' : '#45CE30'},
                 ]}>
                 <Icon name="bitcoin" color="#fff" size={20} />
               </View>
@@ -252,10 +248,10 @@ class HomeScreen extends React.Component {
                   opacity: 1,
                 }}>
                 Bitcoin
-            </Title>
+              </Title>
             </View>
 
-            <View style={{ width: '30%' }}>{LineChartpreview()}</View>
+            <View style={{width: '30%'}}>{LineChartpreview()}</View>
           </View>
 
           <View style={styles.chartPriceArea}>
@@ -266,17 +262,17 @@ class HomeScreen extends React.Component {
                   opacity: 0.8,
                 }}>
                 $0.00
-            </Text>
+              </Text>
               <Text
                 style={{
                   fontFamily: 'BlissPro',
                   opacity: 0.5,
                 }}>
                 0 BTC
-            </Text>
+              </Text>
             </View>
 
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{flexDirection: 'row'}}>
               <View
                 style={{
                   backgroundColor: '#eee',
@@ -291,8 +287,8 @@ class HomeScreen extends React.Component {
                     opacity: 0.6,
                   }}>
                   $14,176.86
-              </Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                </Text>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <Text
                     style={{
                       color: '#D63031',
@@ -307,7 +303,7 @@ class HomeScreen extends React.Component {
                       opacity: 0.6,
                     }}>
                     24hrs
-                </Text>
+                  </Text>
                 </View>
               </View>
             </View>
@@ -315,160 +311,253 @@ class HomeScreen extends React.Component {
         </TouchableOpacity>
       );
     });
-  }
-
+  };
 
   fetchWalletBalance = async (id, userPassword) => {
     getWalletBalance(id, userPassword)
       .then(res => {
         if (res?.data?.data?.ack != 0) {
-          this.setState({ toataBalance: res?.data?.data?.data, isVerified: true })
-
+          this.setState({
+            toataBalance: res?.data?.data?.data,
+            btcData: res?.data?.data?.btc,
+            isVerified: true,
+          });
         }
       })
-      .catch(err => console.log(err))
-  }
+      .catch(err => console.log(err));
+  };
 
   onChangeWalletBalance = () => {
-    const { id, userPassword } = this.props.details?.auth?.data
+    const {id, userPassword} = this.props.details?.auth?.data;
     getWalletBalance(id, userPassword)
       .then(res => {
         if (res?.data?.data?.ack != 1) {
           // settoataBalance(res?.data?.data?.data);
 
-          this.setState({ isVerified: false })
+          this.setState({isVerified: false});
           Alert.alert(
-            "Message",
+            'Message',
             res?.data?.data?.msg,
-            [
-              { text: "OK", onPress: () => console.log("OK Pressed") }
-            ],
-            { cancelable: false }
+            [{text: 'OK', onPress: () => console.log('OK Pressed')}],
+            {cancelable: false},
           );
           return;
         }
-        this.setState({ toataBalance: res?.data?.data?.data, isVerified: true })
-
+        this.setState({toataBalance: res?.data?.data?.data, isVerified: true});
       })
-      .catch(err => console.log(err))
-  }
+      .catch(err => console.log(err));
+  };
 
   componentDidMount() {
-    getUserDetails()
-      .then(userDetails => {
-        if (userDetails) {
-          this.props.signIn(userDetails);
-          console.log('==={}{}', userDetails?.id, userDetails?.userPassword)
-          this.fetchWalletBalance(userDetails?.id, userDetails?.userPassword)
-        }
-      })
+    this._unsubscribe = this.props.navigation.addListener('focus', () => {
+      const { id, userPassword } = this.props?.details?.auth?.data;
+      this.fetchWalletBalance(id, userPassword);
+    });
+
+    getUserDetails().then(userDetails => {
+      if (userDetails) {
+        this.props.signIn(userDetails);
+        console.log('==={}{}', userDetails?.id, userDetails?.userPassword);
+        this.fetchWalletBalance(userDetails?.id, userDetails?.userPassword);
+      }
+    });
     console.log('===>>', moment.unix(1609377300).format('DD-MM-YYYY'));
 
-    const firstLabels = [moment(Date.now()).subtract({ hours: 6 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 5 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 4 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 3 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 2 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 1 }).format('h:mm')];
+    const firstLabels = [
+      moment(Date.now())
+        .subtract({hours: 6})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 5})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 4})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 3})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 2})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 1})
+        .format('h:mm'),
+    ];
     this.onChangeHandleChart(firstLabels, '1D');
+
+    getCurrentBtcPrice()
+      .then(res => {
+        console.log('===>>', Object.entries(res?.data)?.[0]?.[1]?.last);
+        let lastPrice = Object.entries(res?.data)?.[0]?.[1]?.last;
+        this.setState({currentBitcoinPrice: lastPrice});
+      })
+      .catch(err => console.log(err));
+  }
+  componentWillUnmount() {
+    this._unsubscribe();
   }
 
-
   onChangeHandleChart = (labels, type) => {
-
     const LineChartData = {
       labels: labels,
 
       datasets: [
         {
-          data: [
-            Math.random() * 1
-          ],
+          data: [Math.random() * 1],
           color: (opacity = 5) => `rgba(255,69,0, 8)`, // optional
           strokeWidth: 2, // optional
         },
       ],
-    }
+    };
 
     let fiterByDate;
 
     switch (type) {
       case '1D':
-        fiterByDate = moment(Date.now()).subtract({ hours: 6 }).format('YYYY-MM-DD');
+        fiterByDate = moment(Date.now())
+          .subtract({hours: 6})
+          .format('YYYY-MM-DD');
         break;
 
       case '1W':
-        fiterByDate = moment(Date.now()).subtract({ day: 6 }).format('YYYY-MM-DD');
+        fiterByDate = moment(Date.now())
+          .subtract({day: 6})
+          .format('YYYY-MM-DD');
         break;
 
       case '1M':
-        fiterByDate = moment(Date.now()).subtract({ month: 5 }).format('YYYY-MM-DD');
+        fiterByDate = moment(Date.now())
+          .subtract({month: 5})
+          .format('YYYY-MM-DD');
         break;
 
       case '1Y':
-        fiterByDate = moment(Date.now()).subtract({ month: 9 }).format('YYYY-MM-DD');
+        fiterByDate = moment(Date.now())
+          .subtract({month: 9})
+          .format('YYYY-MM-DD');
         break;
 
       case 'All':
-        fiterByDate = moment(Date.now()).subtract({ month: 11 }).format('YYYY-MM-DD');
+        fiterByDate = moment(Date.now())
+          .subtract({month: 11})
+          .format('YYYY-MM-DD');
         break;
 
       default:
         break;
     }
 
-
-
     getChartData(fiterByDate)
       .then(res => {
         // console.log('===>>>//', Math.round(res?.data?.values?.length / 6));
         res?.data?.values?.forEach(data => {
           // console.log('====>>>>>', data?.y)
-          LineChartData.datasets[0].data.push(data?.y)
-
-        })
-        this.setState({ LineChartData })
+          LineChartData.datasets[0].data.push(data?.y);
+        });
+        this.setState({LineChartData});
       })
       .catch(err => console.log(err));
-  }
+  };
 
   onChangeTab = key => {
+    const firstLabels = [
+      moment(Date.now())
+        .subtract({hours: 6})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 5})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 4})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 3})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 2})
+        .format('h:mm'),
+      moment(Date.now())
+        .subtract({hours: 1})
+        .format('h:mm'),
+    ];
 
-    const firstLabels = [moment(Date.now()).subtract({ hours: 6 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 5 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 4 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 3 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 2 }).format('h:mm'),
-    moment(Date.now()).subtract({ hours: 1 }).format('h:mm')];
-
-
-    const seconedLabels = [moment(Date.now()).subtract({ day: 6 }).format('DD. MMM'),
-    moment(Date.now()).subtract({ day: 4 }).format('DD. MMM'),
-    moment(Date.now()).subtract({ day: 2 }).format('DD. MMM'),
-    moment(Date.now()).format('DD. MMM')];
+    const seconedLabels = [
+      moment(Date.now())
+        .subtract({day: 6})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 4})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 2})
+        .format('DD. MMM'),
+      moment(Date.now()).format('DD. MMM'),
+    ];
 
     const thirdLabels = [
-      moment(Date.now()).subtract({ day: 28 }).format('DD. MMM'),
-      moment(Date.now()).subtract({ day: 23 }).format('DD. MMM'),
-      moment(Date.now()).subtract({ day: 18 }).format('DD. MMM'),
-      moment(Date.now()).subtract({ day: 14 }).format('DD. MMM'),
-      moment(Date.now()).subtract({ day: 7 }).format('DD. MMM'),
-      moment(Date.now()).subtract({ day: 1 }).format('DD. MMM')
+      moment(Date.now())
+        .subtract({day: 28})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 23})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 18})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 14})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 7})
+        .format('DD. MMM'),
+      moment(Date.now())
+        .subtract({day: 1})
+        .format('DD. MMM'),
     ];
-    const fourthLabels = [moment(Date.now()).subtract({ month: 11 }).format('MMM. YY'),
-    moment(Date.now()).subtract({ month: 9 }).format('MMM. YY'),
-    moment(Date.now()).subtract({ month: 7 }).format('MMM. YY'),
-    moment(Date.now()).subtract({ month: 5 }).format('MMM. YY'),
-    moment(Date.now()).subtract({ month: 3 }).format('MMM. YY'),
-    moment(Date.now()).subtract({ month: 1 }).format('MMM. YY')];
+    const fourthLabels = [
+      moment(Date.now())
+        .subtract({month: 11})
+        .format('MMM. YY'),
+      moment(Date.now())
+        .subtract({month: 9})
+        .format('MMM. YY'),
+      moment(Date.now())
+        .subtract({month: 7})
+        .format('MMM. YY'),
+      moment(Date.now())
+        .subtract({month: 5})
+        .format('MMM. YY'),
+      moment(Date.now())
+        .subtract({month: 3})
+        .format('MMM. YY'),
+      moment(Date.now())
+        .subtract({month: 1})
+        .format('MMM. YY'),
+    ];
 
-    const fifthLables = [moment(Date.now()).subtract({ year: 9 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 8 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 7 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 6 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 5 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 4 }).format('YYYY'),
-    moment(Date.now()).subtract({ year: 3 }).format('YYYY')];
+    const fifthLables = [
+      moment(Date.now())
+        .subtract({year: 9})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 8})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 7})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 6})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 5})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 4})
+        .format('YYYY'),
+      moment(Date.now())
+        .subtract({year: 3})
+        .format('YYYY'),
+    ];
 
     switch (key) {
       case '1D':
@@ -494,32 +583,45 @@ class HomeScreen extends React.Component {
       default:
         return;
     }
-  }
-
-
+  };
 
   render() {
-    const { navigation } = this.props;
-    const { toataBalance, isVerified, LineChartData } = this.state;
+    const {navigation} = this.props;
+    const {
+      toataBalance,
+      isVerified,
+      LineChartData,
+      currentBitcoinPrice,
+      btcData,
+    } = this.state;
     return (
       <>
         <Header navigation={navigation} title="Dashboard" screenName="Home" />
-        <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
           <View style={styles.totalAreaContainer}>
-            <View style={{ width: '70%' }}>
+            <View style={{width: '70%'}}>
               <Text style={styles.totalBalanceText}>Total Balance</Text>
-              <Title style={styles.totalAreaShortText}>{toataBalance}</Title>
+              <Title
+                style={styles.totalAreaShortText}>{`$ ${toataBalance}`}</Title>
               {/* <Text style={styles.totalAreaColorText}>0.00 (--)</Text> */}
-              {
-                !isVerified && <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 20 }}>
-                  <Text style={{ fontFamily: 'BlissPro', color: '#CE5404' }}>Couldn't fetch the wallet Balance, please try again</Text>
+              {!isVerified && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingRight: 20,
+                  }}>
+                  <Text style={{fontFamily: 'BlissPro', color: '#CE5404'}}>
+                    Couldn't fetch the wallet Balance, please try again
+                  </Text>
                   <TouchableOpacity onPress={this.onChangeWalletBalance}>
                     <Icon name="reload" color="#000" size={20} />
                   </TouchableOpacity>
                 </View>
-              }
+              )}
             </View>
-            <View style={{ width: '30%' }}>{CircleChart()}</View>
+            <View style={{width: '30%'}}>{CircleChart(btcData)}</View>
           </View>
 
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
@@ -527,9 +629,11 @@ class HomeScreen extends React.Component {
           </ScrollView>
           {this.ChartCard()}
 
-
-          <RBSheet closeOnDragDown={true} ref={ref => this.refRBSheet = ref} height={height / 1.5}>
-            <View style={{ alignItems: 'center' }}>
+          <RBSheet
+            closeOnDragDown={true}
+            ref={ref => (this.refRBSheet = ref)}
+            height={height / 1.5}>
+            <View style={{alignItems: 'center'}}>
               <Text
                 style={{
                   fontFamily: 'BlissPro',
@@ -537,8 +641,8 @@ class HomeScreen extends React.Component {
                 }}>
                 Current BTC Price
               </Text>
-              <Title>$14, 043.36</Title>
-              <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+              <Title>{`$ ${currentBitcoinPrice}`}</Title>
+              <View style={{alignItems: 'center', flexDirection: 'row'}}>
                 <Text
                   style={{
                     color: '#D63031',
@@ -559,7 +663,7 @@ class HomeScreen extends React.Component {
             </View>
 
             <LineChart
-              style={{ marginBottom: 20 }}
+              style={{marginBottom: 20}}
               withDots={false}
               data={LineChartData}
               width={width}
@@ -572,13 +676,13 @@ class HomeScreen extends React.Component {
       </>
     );
   }
-};
+}
 
 export default connect(
   state => ({
     details: state,
-  }), {
-  signIn
-}
+  }),
+  {
+    signIn,
+  },
 )(HomeScreen);
-
