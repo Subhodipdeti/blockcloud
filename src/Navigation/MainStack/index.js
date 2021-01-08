@@ -10,6 +10,7 @@ import LockboxScreen from '../../Screens/LocboxScreen/LocboxScreen';
 import SettingsScreen from '../../Screens/SettingsScreen/SettingsScreen';
 import LitWalletScreen from '../../Screens/LtwScreen/LtwScreen';
 import Camera from '../../Screens/CameraScreen/CameraScreen';
+import StatementsScreen from '../../Screens/StatementsScreen/StatementsScreen';
 
 import {createDrawerNavigator} from '@react-navigation/drawer';
 
@@ -25,6 +26,7 @@ export default () => (
     <Drawer.Screen name="LockboxScreen" component={LockboxScreen} />
     <Drawer.Screen name="SettingsScreen" component={SettingsScreen} />
     <Drawer.Screen name="LitWalletScreen" component={LitWalletScreen} />
+    <Drawer.Screen name="StatementsScreen" component={StatementsScreen} />
     <Drawer.Screen name="Camera" component={Camera} />
   </Drawer.Navigator>
 );

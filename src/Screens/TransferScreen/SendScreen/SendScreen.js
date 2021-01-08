@@ -1,28 +1,14 @@
-import React, {useState} from 'react';
-import {View, Text, Alert, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import React, {useState, useEffect } from 'react';
+import {View, Text, Alert, TextInput, ActivityIndicator } from 'react-native';
 import {Content} from 'native-base';
-import {Searchbar, Avatar} from 'react-native-paper';
 import Button from '../../../Components/Button';
 import useAppTheme from '../../../Themes/Context';
 import {connect} from 'react-redux';
-import {createPayment, getUser} from '../../../Services/Api';
+import {createPayment} from '../../../Services/Api';
 import ErrorMsg from '../../../Components/ErrorMsg';
 
-const filteredDataSource = [
-  {id: 1, email: 'subhodipdeti14141@gmail.com'},
-  {id: 2, email: 'jane@gmail.com'},
-  {id: 3, email: 'shakti@gmail.com'},
-  {id: 4, email: 'debu@gmail.com'},
-  {id: 5, email: 'arijit@gmail.com'},
-];
-
 const BuyScreen = ({details}) => {
-  const [userList, setuserList] = useState([]);
-  const [selectedUser, setselectedUser] = useState(null);
-  const [search, setsearch] = useState('');
-
-  const [loading, setloading] = useState(false);
-  // console.log('====>>> from Transfer', details?.auth?.data)
+  
   const {theme} = useAppTheme();
   const [state, setstate] = useState({
     toaddress: '',
@@ -31,6 +17,7 @@ const BuyScreen = ({details}) => {
     isErr: false,
     errMsg: '',
     isLoading: false,
+    textBoxWidth: ''
   });
 
   const onChangePaymentHandler = () => {
@@ -69,61 +56,10 @@ const BuyScreen = ({details}) => {
       });
   };
 
-  const searchFilterFunction = text => {
-    setsearch(text);
-    if (text) {
-      getUser(text).then(res => {
-        console.log('===>>', res?.data?.data?.list);
-        const newData = res?.data?.data?.list?.filter(function(item) {
-          // Applying filter for the inserted text in search bar
-          const itemData = item.email
-            ? item.email.toUpperCase()
-            : ''.toUpperCase();
-          const textData = text.toUpperCase();
-          return itemData.indexOf(textData) > -1;
-        });
-        setuserList(newData);
-        setsearch(text);
-      });
-    }
-  };
 
-  const ItemSeparatorView = () => {
-    return (
-      <View
-        style={{
-          height: 0.5,
-          width: '100%',
-          backgroundColor: '#C8C8C8',
-        }}
-      />
-    );
-  };
-
-  const ItemView = ({item}) => {
-    const onChangeUserHandle = user => {
-      setsearch(null);
-      setuserList(null);
-      setselectedUser(user);
-      console.log(user);
-    };
-    return (
-      <TouchableOpacity
-        onPress={() => onChangeUserHandle(item)}
-        style={{
-          width: '100%',
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          padding: 10,
-        }}>
-        <Avatar.Text size={24} label={item?.email?.slice(0, 1).toUpperCase()} />
-        <Text style={{fontFamily: 'BlissPro', marginLeft: 10}}>
-          {item?.email[0].toUpperCase() + item?.email?.slice(1)}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  useEffect(() => {
+    setstate({ textBoxWidth: '100%' })
+  }, [])
 
   return (
     <Content style={{backgroundColor: theme.colors.background}}>
@@ -176,7 +112,7 @@ const BuyScreen = ({details}) => {
 
           <TextInput
             onChangeText={text => setstate({...state, toaddress: text})}
-            style={{width: '100%', fontFamily: 'BlissPro'}}
+            style={{width: state.textBoxWidth ? state.textBoxWidth : 0, fontFamily: 'BlissPro'}}
             placeholder="Please enter a Wallet Address"
           />
         </View>

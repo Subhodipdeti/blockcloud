@@ -172,6 +172,21 @@ export function DrawerScreen(props) {
                 props.navigation.navigate('LockboxScreen');
               }}
             />
+
+            <DrawerItem
+              icon={({color, size}) => (
+                <Icon name="file-multiple" color={color} size={size} />
+              )}
+              label="Statement"
+              labelStyle={{
+                fontFamily: 'BlissPro',
+                fontSize: 17,
+                fontWeight: '600',
+              }}
+              onPress={() => {
+                props.navigation.navigate('StatementsScreen');
+              }}
+            />
           </Drawer.Section>
 
           <Drawer.Section style={styles.drawerSection}>

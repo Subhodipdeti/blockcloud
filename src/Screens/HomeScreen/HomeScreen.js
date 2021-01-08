@@ -5,9 +5,10 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
   Alert,
 } from 'react-native';
-import {Title} from 'react-native-paper';
+import {TextInput, Title} from 'react-native-paper';
 import {ProgressCircle, StackedAreaChart} from 'react-native-svg-charts';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as shape from 'd3-shape';
@@ -145,7 +146,7 @@ const CircleChart = btcData => {
   );
 };
 
-function PriceCard() {
+function PriceCard(usdRate) {
   const cards = [1, 2, 3];
   return cards.map((item, index) => {
     return (
@@ -170,15 +171,14 @@ function PriceCard() {
                 fontFamily: 'BlissPro',
                 fontSize: 18,
                 opacity: 0.5,
-              }}>
-              0.00
-            </Title>
+              }}
+            />
             <Text
               style={{
                 fontFamily: 'BlissPro',
                 opacity: 0.5,
               }}>
-              US$0.00
+              {`US $${usdRate}`}
             </Text>
           </View>
         </View>
@@ -208,6 +208,8 @@ class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      usdRate: '',
+      isLoading: true,
       isVerified: false,
       toataBalance: '',
       currentBitcoinPrice: '',
@@ -261,14 +263,14 @@ class HomeScreen extends React.Component {
                   fontFamily: 'BlissPro',
                   opacity: 0.8,
                 }}>
-                $0.00
+                {/* $0.00 */}
               </Text>
               <Text
                 style={{
                   fontFamily: 'BlissPro',
                   opacity: 0.5,
                 }}>
-                0 BTC
+                {`${this.state.btcData} BTC`}
               </Text>
             </View>
 
@@ -286,7 +288,7 @@ class HomeScreen extends React.Component {
                     fontFamily: 'BlissPro',
                     opacity: 0.6,
                   }}>
-                  $14,176.86
+                  {`$ ${this.state.currentBitcoinPrice}`}
                 </Text>
                 <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <Text
@@ -317,14 +319,19 @@ class HomeScreen extends React.Component {
     getWalletBalance(id, userPassword)
       .then(res => {
         if (res?.data?.data?.ack != 0) {
+          const {data, btc, usdRate} = res?.data?.data;
           this.setState({
-            toataBalance: res?.data?.data?.data,
-            btcData: res?.data?.data?.btc,
+            isLoading: false,
+            toataBalance: data,
+            btcData: btc,
+            usdRate: usdRate,
             isVerified: true,
           });
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        this.setState({isLoading: false});
+      });
   };
 
   onChangeWalletBalance = () => {
@@ -332,8 +339,6 @@ class HomeScreen extends React.Component {
     getWalletBalance(id, userPassword)
       .then(res => {
         if (res?.data?.data?.ack != 1) {
-          // settoataBalance(res?.data?.data?.data);
-
           this.setState({isVerified: false});
           Alert.alert(
             'Message',
@@ -350,7 +355,7 @@ class HomeScreen extends React.Component {
 
   componentDidMount() {
     this._unsubscribe = this.props.navigation.addListener('focus', () => {
-      const { id, userPassword } = this.props?.details?.auth?.data;
+      const {id, userPassword} = this.props?.details?.auth?.data;
       this.fetchWalletBalance(id, userPassword);
     });
 
@@ -588,6 +593,7 @@ class HomeScreen extends React.Component {
   render() {
     const {navigation} = this.props;
     const {
+      isLoading,
       toataBalance,
       isVerified,
       LineChartData,
@@ -601,31 +607,43 @@ class HomeScreen extends React.Component {
           <View style={styles.totalAreaContainer}>
             <View style={{width: '70%'}}>
               <Text style={styles.totalBalanceText}>Total Balance</Text>
-              <Title
-                style={styles.totalAreaShortText}>{`$ ${toataBalance}`}</Title>
-              {/* <Text style={styles.totalAreaColorText}>0.00 (--)</Text> */}
-              {!isVerified && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingRight: 20,
-                  }}>
-                  <Text style={{fontFamily: 'BlissPro', color: '#CE5404'}}>
-                    Couldn't fetch the wallet Balance, please try again
-                  </Text>
-                  <TouchableOpacity onPress={this.onChangeWalletBalance}>
-                    <Icon name="reload" color="#000" size={20} />
-                  </TouchableOpacity>
-                </View>
+
+              {isLoading ? (
+                <ActivityIndicator
+                  color="#192A56"
+                  size="large"
+                  style={{alignItems: 'flex-start'}}
+                />
+              ) : (
+                <>
+                  <Title
+                    style={
+                      styles.totalAreaShortText
+                    }>{`$ ${toataBalance}`}</Title>
+                  {!isVerified && (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        paddingRight: 20,
+                      }}>
+                      <Text style={{fontFamily: 'BlissPro', color: '#CE5404'}}>
+                        Couldn't fetch the wallet Balance, please try again
+                      </Text>
+                      <TouchableOpacity onPress={this.onChangeWalletBalance}>
+                        <Icon name="reload" color="#000" size={20} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
               )}
             </View>
             <View style={{width: '30%'}}>{CircleChart(btcData)}</View>
           </View>
 
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            {PriceCard()}
+            {PriceCard(this.state.usdRate)}
           </ScrollView>
           {this.ChartCard()}
 

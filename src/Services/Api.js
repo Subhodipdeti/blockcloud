@@ -100,4 +100,19 @@ const getCurrentBtcPrice = () => {
     });
 }
 
-export { createUser, loginUser, getWalletBalance, createPayment, getUser, getChartData, getCurrentBtcPrice };
+
+const getStatements = (userId) => {
+    return new Promise((resolve, reject) => {
+        let bodyFormData = new FormData();
+        bodyFormData.append('userId', userId);
+
+        axios.post('http://scriptwebsolution.in/project/bitcoin/api/users/history.json', bodyFormData)
+            .then((response) => {
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+export { createUser, loginUser, getWalletBalance, createPayment, getUser, getChartData, getCurrentBtcPrice, getStatements };
