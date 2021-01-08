@@ -16,29 +16,33 @@ const {height, width} = Dimensions.get('screen');
 
 function MyTabs({navigation, details}) {
   return (
-    <>
-      <Header navigation={navigation} title="Transfer" screenName="Transfer" />
+   <>
+    <Header navigation={navigation} title="Transfer" screenName="Transfer" />
+    <SendScreen />
+   </>
+    // <>
+    //   <Header navigation={navigation} title="Transfer" screenName="Transfer" />
 
-      <Tab.Navigator
-        tabBarOptions={{
-          labelStyle: {
-            color: '#fff',
-            fontFamily: 'BlissPro-Bold',
-          },
-          style: {
-            backgroundColor: '#192A56',
-            elevation: 0,
-          },
-          indicatorStyle: {
-            height: 5,
-            backgroundColor: '#fff',
-            borderRadius: 5,
-          },
-        }}>
-        <Tab.Screen name="Send" component={SendScreen} />
-        <Tab.Screen name="Receive" component={SellScreen} />
-      </Tab.Navigator>
-    </>
+    //   <Tab.Navigator
+    //     tabBarOptions={{
+    //       labelStyle: {
+    //         color: '#fff',
+    //         fontFamily: 'BlissPro-Bold',
+    //       },
+    //       style: {
+    //         backgroundColor: '#192A56',
+    //         elevation: 0,
+    //       },
+    //       indicatorStyle: {
+    //         height: 5,
+    //         backgroundColor: '#fff',
+    //         borderRadius: 5,
+    //       },
+    //     }}>
+    //     <Tab.Screen name="Send" component={SendScreen} />
+    //     <Tab.Screen name="Receive" component={SellScreen} />
+    //   </Tab.Navigator>
+    // </>
   );
 }
 
